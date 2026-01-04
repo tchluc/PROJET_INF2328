@@ -3,380 +3,479 @@ package view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.scene.text.Text;
-import model.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import model.City;
+import model.GameState;
+import model.PowerPlant;
+import model.Residence;
+
+import java.util.List;
 
 /**
  * Vue principale du jeu.
- * Layout BorderPane avec panneaux d'information, contrôles et visualisation.
+ * 
+ * Cette vue contient l'interface complete du jeu:
+ * - En haut: barre d'informations (credits, bonheur, cycle)
+ * - A gauche: boutons de controle
+ * - Au centre: affichage de l'energie et des batiments
+ * - En bas: journal des evenements
+ * 
+ * On utilise un BorderPane qui divise l'ecran en 5 zones:
+ * TOP, LEFT, CENTER, RIGHT, BOTTOM
  */
 public class MainGameView {
+    
+    // Le conteneur principal (BorderPane)
     private BorderPane root;
     
-    // Top: Barre d'informations
-    private Label resourcesLabel;
-    private Label happinessLabel;
-    private Label cycleLabel;
-    private Label colonyNameLabel;
-    private ProgressBar happinessBar;
+    // === ELEMENTS DE LA BARRE DU HAUT ===
+    private Label labelResources;      // Affiche les credits
+    private Label labelBonheur;        // Affiche le bonheur
+    private Label labelCycle;          // Affiche le numero du cycle
+    private Label labelNomColonie;     // Affiche le nom de la colonie
+    private ProgressBar barreBonheur;  // Barre de progression du bonheur
     
-    // Left: Panel de contrôle
-    private Button buildButton;
-    private Button upgradeButton;
-    private Button detailsButton;
-    private Button nextCycleButton;
+    // === BOUTONS DE CONTROLE (GAUCHE) ===
+    private Button boutonConstruire;   // Construire une centrale
+    private Button boutonAmeliorer;    // Ameliorer une centrale
+    private Button boutonDetails;      // Voir les details
+    private Button boutonCycleSuivant; // Passer au cycle suivant
     
-    // Center: Zone de visualisation
-    private VBox centerPanel;
-    private ProgressBar productionBar;
-    private ProgressBar demandBar;
-    private Label productionLabel;
-    private Label demandLabel;
-    private Label balanceLabel;
-    private ListView<String> powerPlantsList;
-    private ListView<String> residencesList;
+    // === ELEMENTS DU CENTRE ===
+    private VBox panneauCentral;
+    private ProgressBar barreProduction; // Barre de la production
+    private ProgressBar barreDemande;    // Barre de la demande
+    private Label labelProduction;       // Texte de la production
+    private Label labelDemande;          // Texte de la demande
+    private Label labelBalance;          // Balance energie
+    private ListView<String> listeCentrales;  // Liste des centrales
+    private ListView<String> listeResidences; // Liste des residences
     
-    // Bottom: Zone de logs
-    private TextArea logArea;
+    // === ZONE DE LOG (BAS) ===
+    private TextArea zoneLog;
     
+    /**
+     * Constructeur: cree la vue principale
+     */
     public MainGameView() {
-        createView();
+        creerVue();
     }
     
-    private void createView() {
+    /**
+     * Cree tous les elements de l'interface.
+     */
+    private void creerVue() {
+        // On cree le conteneur BorderPane
         root = new BorderPane();
         root.getStyleClass().add("game-root");
         
-        createTopBar();
-        createLeftPanel();
-        createCenterPanel();
-        createBottomPanel();
+        // On cree chaque section
+        creerBarreHaut();
+        creerPanneauGauche();
+        creerPanneauCentral();
+        creerPanneauBas();
     }
     
     /**
-     * Crée la barre supérieure d'informations
+     * Cree la barre superieure avec les informations du jeu.
      */
-    private void createTopBar() {
-        HBox topBar = new HBox(30);
-        topBar.setPadding(new Insets(15, 20, 15, 20));
-        topBar.setAlignment(Pos.CENTER_LEFT);
-        topBar.getStyleClass().add("info-bar");
+    private void creerBarreHaut() {
+        // On cree une boite horizontale
+        HBox barreHaut = new HBox(30);
+        barreHaut.setPadding(new Insets(15, 20, 15, 20));
+        barreHaut.setAlignment(Pos.CENTER_LEFT);
+        barreHaut.getStyleClass().add("info-bar");
         
         // Nom de la colonie
-        colonyNameLabel = new Label("Colonie Nova-7");
-        colonyNameLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #00d4ff;");
+        labelNomColonie = new Label("Colonie Nova-7");
+        labelNomColonie.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #00d4ff;");
         
-        // Cycle
-        cycleLabel = new Label("Cycle: 0");
-        cycleLabel.getStyleClass().add("label-stat");
+        // Numero du cycle
+        labelCycle = new Label("Cycle: 0");
+        labelCycle.getStyleClass().add("label-stat");
         
-        // Ressources
-        resourcesLabel = new Label("💰 Crédits: 0");
-        resourcesLabel.getStyleClass().add("label-stat");
+        // Credits
+        labelResources = new Label("💰 Crédits: 0");
+        labelResources.getStyleClass().add("label-stat");
         
-        // Bonheur avec barre de progression
-        VBox happinessBox = new VBox(5);
-        happinessLabel = new Label("😊 Bonheur: 0%");
-        happinessLabel.getStyleClass().add("label-stat");
+        // Bonheur (label + barre de progression)
+        VBox boiteBonheur = new VBox(5);
         
-        happinessBar = new ProgressBar(0);
-        happinessBar.setPrefWidth(150);
-        happinessBar.getStyleClass().add("progress-bar");
+        labelBonheur = new Label("😊 Bonheur: 0%");
+        labelBonheur.getStyleClass().add("label-stat");
         
-        happinessBox.getChildren().addAll(happinessLabel, happinessBar);
+        barreBonheur = new ProgressBar(0);
+        barreBonheur.setPrefWidth(150);
+        barreBonheur.getStyleClass().add("progress-bar");
         
-        // Spacer
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        boiteBonheur.getChildren().add(labelBonheur);
+        boiteBonheur.getChildren().add(barreBonheur);
         
-        topBar.getChildren().addAll(colonyNameLabel, cycleLabel, resourcesLabel, happinessBox, spacer);
+        // Espace flexible pour pousser les elements a gauche
+        Region espaceur = new Region();
+        HBox.setHgrow(espaceur, Priority.ALWAYS);
         
-        root.setTop(topBar);
+        // On ajoute tous les elements a la barre
+        barreHaut.getChildren().add(labelNomColonie);
+        barreHaut.getChildren().add(labelCycle);
+        barreHaut.getChildren().add(labelResources);
+        barreHaut.getChildren().add(boiteBonheur);
+        barreHaut.getChildren().add(espaceur);
+        
+        // On place la barre en haut du BorderPane
+        root.setTop(barreHaut);
     }
     
     /**
-     * Crée le panneau gauche de contrôle
+     * Cree le panneau gauche avec les boutons de controle.
      */
-    private void createLeftPanel() {
-        VBox leftPanel = new VBox(15);
-        leftPanel.setPadding(new Insets(20));
-        leftPanel.setPrefWidth(250);
-        leftPanel.getStyleClass().add("panel");
+    private void creerPanneauGauche() {
+        // On cree une boite verticale
+        VBox panneauGauche = new VBox(15);
+        panneauGauche.setPadding(new Insets(20));
+        panneauGauche.setPrefWidth(250);
+        panneauGauche.getStyleClass().add("panel");
         
-        Label controlLabel = new Label("🎮 CONTRÔLES");
-        controlLabel.getStyleClass().add("panel-header");
+        // Titre du panneau
+        Label labelTitre = new Label("🎮 CONTRÔLES");
+        labelTitre.getStyleClass().add("panel-header");
         
-        buildButton = new Button("🏗️ Construire Centrale");
-        buildButton.setMaxWidth(Double.MAX_VALUE);
-        buildButton.getStyleClass().add("button");
+        // Bouton Construire
+        boutonConstruire = new Button("🏗️ Construire Centrale");
+        boutonConstruire.setMaxWidth(Double.MAX_VALUE);  // Prend toute la largeur
+        boutonConstruire.getStyleClass().add("button");
         
-        upgradeButton = new Button("⬆️ Améliorer Centrale");
-        upgradeButton.setMaxWidth(Double.MAX_VALUE);
-        upgradeButton.getStyleClass().add("button");
+        // Bouton Ameliorer
+        boutonAmeliorer = new Button("⬆️ Améliorer Centrale");
+        boutonAmeliorer.setMaxWidth(Double.MAX_VALUE);
+        boutonAmeliorer.getStyleClass().add("button");
         
-        detailsButton = new Button("📊 Voir Détails");
-        detailsButton.setMaxWidth(Double.MAX_VALUE);
-        detailsButton.getStyleClass().add("button");
+        // Bouton Details
+        boutonDetails = new Button("📊 Voir Détails");
+        boutonDetails.setMaxWidth(Double.MAX_VALUE);
+        boutonDetails.getStyleClass().add("button");
         
-        Separator separator = new Separator();
+        // Separateur
+        Separator separateur = new Separator();
         
-        nextCycleButton = new Button("⏩ CYCLE SUIVANT");
-        nextCycleButton.setMaxWidth(Double.MAX_VALUE);
-        nextCycleButton.getStyleClass().addAll("button", "button-primary");
-        nextCycleButton.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        // Bouton Cycle Suivant (plus gros et plus visible)
+        boutonCycleSuivant = new Button("⏩ CYCLE SUIVANT");
+        boutonCycleSuivant.setMaxWidth(Double.MAX_VALUE);
+        boutonCycleSuivant.getStyleClass().add("button");
+        boutonCycleSuivant.getStyleClass().add("button-primary");
+        boutonCycleSuivant.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         
-        leftPanel.getChildren().addAll(
-            controlLabel,
-            buildButton,
-            upgradeButton,
-            detailsButton,
-            separator,
-            nextCycleButton
-        );
+        // On ajoute tous les elements
+        panneauGauche.getChildren().add(labelTitre);
+        panneauGauche.getChildren().add(boutonConstruire);
+        panneauGauche.getChildren().add(boutonAmeliorer);
+        panneauGauche.getChildren().add(boutonDetails);
+        panneauGauche.getChildren().add(separateur);
+        panneauGauche.getChildren().add(boutonCycleSuivant);
         
-        root.setLeft(leftPanel);
+        // On place le panneau a gauche
+        root.setLeft(panneauGauche);
     }
     
     /**
-     * Crée le panneau central de visualisation
+     * Cree le panneau central avec l'affichage de l'energie et des batiments.
      */
-    private void createCenterPanel() {
-        centerPanel = new VBox(20);
-        centerPanel.setPadding(new Insets(20));
+    private void creerPanneauCentral() {
+        panneauCentral = new VBox(20);
+        panneauCentral.setPadding(new Insets(20));
         
-        // Section Production/Demande
-        VBox energySection = createEnergySection();
+        // Section Energie
+        VBox sectionEnergie = creerSectionEnergie();
         
-        // Section Centrales et Résidences
-        HBox buildingsSection = createBuildingsSection();
+        // Section Batiments (centrales et residences)
+        HBox sectionBatiments = creerSectionBatiments();
         
-        centerPanel.getChildren().addAll(energySection, buildingsSection);
+        panneauCentral.getChildren().add(sectionEnergie);
+        panneauCentral.getChildren().add(sectionBatiments);
         
-        root.setCenter(centerPanel);
+        root.setCenter(panneauCentral);
     }
     
     /**
-     * Crée la section affichant production et demande
+     * Cree la section affichant la production et la demande d'energie.
      */
-    private VBox createEnergySection() {
+    private VBox creerSectionEnergie() {
         VBox section = new VBox(15);
         section.setPadding(new Insets(20));
         section.getStyleClass().add("panel");
         
-        Label header = new Label("⚡ ÉNERGIE");
-        header.getStyleClass().add("panel-header");
+        // Titre
+        Label titre = new Label("⚡ ÉNERGIE");
+        titre.getStyleClass().add("panel-header");
         
-        // Production
-        HBox prodBox = new HBox(10);
-        prodBox.setAlignment(Pos.CENTER_LEFT);
-        productionLabel = new Label("Production: 0 kW");
-        productionLabel.setPrefWidth(200);
-        productionBar = new ProgressBar(0);
-        productionBar.setPrefWidth(400);
-        productionBar.getStyleClass().addAll("progress-bar", "progress-bar-success");
-        prodBox.getChildren().addAll(productionLabel, productionBar);
+        // Ligne Production
+        HBox ligneProduction = new HBox(10);
+        ligneProduction.setAlignment(Pos.CENTER_LEFT);
         
-        // Demande
-        HBox demandBox = new HBox(10);
-        demandBox.setAlignment(Pos.CENTER_LEFT);
-        demandLabel = new Label("Demande: 0 kW");
-        demandLabel.setPrefWidth(200);
-        demandBar = new ProgressBar(0);
-        demandBar.setPrefWidth(400);
-        demandBar.getStyleClass().addAll("progress-bar", "progress-bar-warning");
-        demandBox.getChildren().addAll(demandLabel, demandBar);
+        labelProduction = new Label("Production: 0 kW");
+        labelProduction.setPrefWidth(200);
+        
+        barreProduction = new ProgressBar(0);
+        barreProduction.setPrefWidth(400);
+        barreProduction.getStyleClass().add("progress-bar");
+        barreProduction.getStyleClass().add("progress-bar-success");
+        
+        ligneProduction.getChildren().add(labelProduction);
+        ligneProduction.getChildren().add(barreProduction);
+        
+        // Ligne Demande
+        HBox ligneDemande = new HBox(10);
+        ligneDemande.setAlignment(Pos.CENTER_LEFT);
+        
+        labelDemande = new Label("Demande: 0 kW");
+        labelDemande.setPrefWidth(200);
+        
+        barreDemande = new ProgressBar(0);
+        barreDemande.setPrefWidth(400);
+        barreDemande.getStyleClass().add("progress-bar");
+        barreDemande.getStyleClass().add("progress-bar-warning");
+        
+        ligneDemande.getChildren().add(labelDemande);
+        ligneDemande.getChildren().add(barreDemande);
         
         // Balance
-        balanceLabel = new Label("Balance: 0 kW");
-        balanceLabel.getStyleClass().add("label-stat");
-        balanceLabel.setStyle("-fx-font-size: 18px;");
+        labelBalance = new Label("Balance: 0 kW");
+        labelBalance.getStyleClass().add("label-stat");
+        labelBalance.setStyle("-fx-font-size: 18px;");
         
-        section.getChildren().addAll(header, prodBox, demandBox, balanceLabel);
+        // On assemble
+        section.getChildren().add(titre);
+        section.getChildren().add(ligneProduction);
+        section.getChildren().add(ligneDemande);
+        section.getChildren().add(labelBalance);
         
         return section;
     }
     
     /**
-     * Crée la section affichant les bâtiments
+     * Cree la section affichant les centrales et les residences.
      */
-    private HBox createBuildingsSection() {
+    private HBox creerSectionBatiments() {
         HBox section = new HBox(20);
         section.setAlignment(Pos.TOP_CENTER);
         
-        // Centrales
-        VBox plantsBox = new VBox(10);
-        plantsBox.setPadding(new Insets(15));
-        plantsBox.getStyleClass().add("panel");
-        plantsBox.setPrefWidth(400);
+        // === COLONNE CENTRALES ===
+        VBox boiteCentrales = new VBox(10);
+        boiteCentrales.setPadding(new Insets(15));
+        boiteCentrales.getStyleClass().add("panel");
+        boiteCentrales.setPrefWidth(400);
         
-        Label plantsHeader = new Label("🏭 CENTRALES ÉLECTRIQUES");
-        plantsHeader.getStyleClass().add("panel-header");
+        Label titreCentrales = new Label("🏭 CENTRALES ÉLECTRIQUES");
+        titreCentrales.getStyleClass().add("panel-header");
         
-        powerPlantsList = new ListView<>();
-        powerPlantsList.setPrefHeight(200);
-        powerPlantsList.getStyleClass().add("list-view");
+        listeCentrales = new ListView<String>();
+        listeCentrales.setPrefHeight(200);
+        listeCentrales.getStyleClass().add("list-view");
         
-        plantsBox.getChildren().addAll(plantsHeader, powerPlantsList);
+        boiteCentrales.getChildren().add(titreCentrales);
+        boiteCentrales.getChildren().add(listeCentrales);
         
-        // Résidences
-        VBox residencesBox = new VBox(10);
-        residencesBox.setPadding(new Insets(15));
-        residencesBox.getStyleClass().add("panel");
-        residencesBox.setPrefWidth(400);
+        // === COLONNE RESIDENCES ===
+        VBox boiteResidences = new VBox(10);
+        boiteResidences.setPadding(new Insets(15));
+        boiteResidences.getStyleClass().add("panel");
+        boiteResidences.setPrefWidth(400);
         
-        Label residencesHeader = new Label("🏘️ RÉSIDENCES");
-        residencesHeader.getStyleClass().add("panel-header");
+        Label titreResidences = new Label("🏘️ RÉSIDENCES");
+        titreResidences.getStyleClass().add("panel-header");
         
-        residencesList = new ListView<>();
-        residencesList.setPrefHeight(200);
-        residencesList.getStyleClass().add("list-view");
+        listeResidences = new ListView<String>();
+        listeResidences.setPrefHeight(200);
+        listeResidences.getStyleClass().add("list-view");
         
-        residencesBox.getChildren().addAll(residencesHeader, residencesList);
+        boiteResidences.getChildren().add(titreResidences);
+        boiteResidences.getChildren().add(listeResidences);
         
-        section.getChildren().addAll(plantsBox, residencesBox);
+        // On assemble
+        section.getChildren().add(boiteCentrales);
+        section.getChildren().add(boiteResidences);
         
         return section;
     }
     
     /**
-     * Crée le panneau inférieur de logs
+     * Cree le panneau du bas avec le journal des evenements.
      */
-    private void createBottomPanel() {
-        VBox bottomPanel = new VBox(10);
-        bottomPanel.setPadding(new Insets(15, 20, 15, 20));
-        bottomPanel.setPrefHeight(180);
+    private void creerPanneauBas() {
+        VBox panneauBas = new VBox(10);
+        panneauBas.setPadding(new Insets(15, 20, 15, 20));
+        panneauBas.setPrefHeight(180);
         
-        Label logHeader = new Label("📜 JOURNAL DE BORD");
-        logHeader.getStyleClass().add("panel-header");
+        // Titre
+        Label titre = new Label("📜 JOURNAL DE BORD");
+        titre.getStyleClass().add("panel-header");
         
-        logArea = new TextArea();
-        logArea.setEditable(false);
-        logArea.setWrapText(true);
-        logArea.getStyleClass().add("log-area");
-        VBox.setVgrow(logArea, Priority.ALWAYS);
+        // Zone de texte pour le log
+        zoneLog = new TextArea();
+        zoneLog.setEditable(false);  // On ne peut pas modifier le texte
+        zoneLog.setWrapText(true);   // Retour a la ligne automatique
+        zoneLog.getStyleClass().add("log-area");
+        VBox.setVgrow(zoneLog, Priority.ALWAYS);  // Prend tout l'espace disponible
         
-        bottomPanel.getChildren().addAll(logHeader, logArea);
+        panneauBas.getChildren().add(titre);
+        panneauBas.getChildren().add(zoneLog);
         
-        root.setBottom(bottomPanel);
+        root.setBottom(panneauBas);
     }
     
     /**
-     * Met à jour l'affichage avec l'état du jeu actuel
+     * Met a jour l'affichage avec l'etat du jeu actuel.
+     * 
+     * @param gameState L'etat du jeu
      */
     public void updateDisplay(GameState gameState) {
         City city = gameState.getCity();
         
-        // Top bar
-        colonyNameLabel.setText("🚀 " + city.getName());
-        cycleLabel.setText("Cycle: " + gameState.getCurrentCycle());
-        resourcesLabel.setText("💰 Crédits: " + gameState.getResources());
+        // === MISE A JOUR DE LA BARRE DU HAUT ===
+        labelNomColonie.setText("🚀 " + city.getName());
+        labelCycle.setText("Cycle: " + gameState.getCurrentCycle());
+        labelResources.setText("💰 Crédits: " + gameState.getResources());
         
-        double happiness = gameState.getHappiness();
-        happinessLabel.setText(String.format("😊 Bonheur: %.0f%% (%s)", 
-                happiness * 100, gameState.getHappinessStatus()));
-        happinessBar.setProgress(happiness);
+        double bonheur = gameState.getHappiness();
+        labelBonheur.setText("😊 Bonheur: " + Math.round(bonheur * 100) + "% (" + gameState.getHappinessStatus() + ")");
+        barreBonheur.setProgress(bonheur);
         
-        // Changer la couleur de la barre selon le niveau
-        happinessBar.getStyleClass().removeAll("progress-bar-success", "progress-bar-warning", "progress-bar-danger");
-        if (happiness >= 0.7) {
-            happinessBar.getStyleClass().add("progress-bar-success");
-        } else if (happiness >= 0.4) {
-            happinessBar.getStyleClass().add("progress-bar-warning");
+        // On change la couleur de la barre selon le niveau de bonheur
+        barreBonheur.getStyleClass().remove("progress-bar-success");
+        barreBonheur.getStyleClass().remove("progress-bar-warning");
+        barreBonheur.getStyleClass().remove("progress-bar-danger");
+        
+        if (bonheur >= 0.7) {
+            barreBonheur.getStyleClass().add("progress-bar-success");
+        } else if (bonheur >= 0.4) {
+            barreBonheur.getStyleClass().add("progress-bar-warning");
         } else {
-            happinessBar.getStyleClass().add("progress-bar-danger");
+            barreBonheur.getStyleClass().add("progress-bar-danger");
         }
         
-        // Production et demande
+        // === MISE A JOUR DE LA SECTION ENERGIE ===
         double production = city.getTotalEnergyProduction();
-        double demand = city.getTotalEnergyDemand();
-        double maxValue = Math.max(production, demand);
+        double demande = city.getTotalEnergyDemand();
         
-        productionLabel.setText(String.format("Production: %.0f kW", production));
-        demandLabel.setText(String.format("Demande: %.0f kW", demand));
+        labelProduction.setText("Production: " + Math.round(production) + " kW");
+        labelDemande.setText("Demande: " + Math.round(demande) + " kW");
         
-        if (maxValue > 0) {
-            productionBar.setProgress(production / maxValue);
-            demandBar.setProgress(demand / maxValue);
+        // On calcule le maximum pour les barres de progression
+        double maximum = production;
+        if (demande > maximum) {
+            maximum = demande;
+        }
+        
+        // On met a jour les barres
+        if (maximum > 0) {
+            barreProduction.setProgress(production / maximum);
+            barreDemande.setProgress(demande / maximum);
         } else {
-            productionBar.setProgress(0);
-            demandBar.setProgress(0);
+            barreProduction.setProgress(0);
+            barreDemande.setProgress(0);
         }
         
         // Balance
-        double balance = production - demand;
-        String balanceText;
-        String balanceStyle;
+        double balance = production - demande;
+        String texteBalance;
+        String styleBalance;
         
         if (balance >= 0) {
-            balanceText = String.format("✅ Excédent: +%.0f kW", balance);
-            balanceStyle = "-fx-text-fill: #10b981;";
+            texteBalance = "✅ Excédent: +" + Math.round(balance) + " kW";
+            styleBalance = "-fx-text-fill: #10b981;";  // Vert
         } else {
-            balanceText = String.format("❌ Déficit: %.0f kW", balance);
-            balanceStyle = "-fx-text-fill: #ef4444;";
+            texteBalance = "❌ Déficit: " + Math.round(balance) + " kW";
+            styleBalance = "-fx-text-fill: #ef4444;";  // Rouge
         }
-        balanceLabel.setText(balanceText);
-        balanceLabel.setStyle("-fx-font-size: 18px; " + balanceStyle);
+        labelBalance.setText(texteBalance);
+        labelBalance.setStyle("-fx-font-size: 18px; " + styleBalance);
         
-        // Listes de bâtiments
-        powerPlantsList.getItems().clear();
-        for (PowerPlant plant : city.getPowerPlants()) {
-            powerPlantsList.getItems().add(plant.getType().getIcon() + " " + plant.toString());
+        // === MISE A JOUR DES LISTES ===
+        
+        // Liste des centrales
+        listeCentrales.getItems().clear();
+        List<PowerPlant> centrales = city.getPowerPlants();
+        for (int i = 0; i < centrales.size(); i++) {
+            PowerPlant centrale = centrales.get(i);
+            String texte = centrale.getType().getIcon() + " " + centrale.toString();
+            listeCentrales.getItems().add(texte);
         }
         
-        residencesList.getItems().clear();
-        for (Residence residence : city.getResidences()) {
-            residencesList.getItems().add(residence.toString());
+        // Liste des residences
+        listeResidences.getItems().clear();
+        List<Residence> residences = city.getResidences();
+        for (int i = 0; i < residences.size(); i++) {
+            Residence residence = residences.get(i);
+            listeResidences.getItems().add(residence.toString());
         }
     }
     
     /**
-     * Ajoute des messages au log
+     * Ajoute des messages au journal.
+     * 
+     * @param logs Liste des messages a ajouter
      */
-    public void addLogs(java.util.List<String> logs) {
-        for (String log : logs) {
-            logArea.appendText(log + "\n");
+    public void addLogs(List<String> logs) {
+        for (int i = 0; i < logs.size(); i++) {
+            String message = logs.get(i);
+            zoneLog.appendText(message + "\n");
         }
-        // Auto-scroll vers le bas
-        logArea.setScrollTop(Double.MAX_VALUE);
+        // On fait defiler vers le bas
+        zoneLog.setScrollTop(Double.MAX_VALUE);
     }
     
     /**
-     * Efface le log
+     * Efface le contenu du journal.
      */
     public void clearLogs() {
-        logArea.clear();
+        zoneLog.clear();
     }
     
-    // Getters pour les boutons
+    // ========================================
+    // GETTERS POUR LES BOUTONS
+    // ========================================
+    
     public Button getBuildButton() {
-        return buildButton;
+        return boutonConstruire;
     }
     
     public Button getUpgradeButton() {
-        return upgradeButton;
+        return boutonAmeliorer;
     }
     
     public Button getDetailsButton() {
-        return detailsButton;
+        return boutonDetails;
     }
     
     public Button getNextCycleButton() {
-        return nextCycleButton;
+        return boutonCycleSuivant;
     }
     
     public ListView<String> getPowerPlantsList() {
-        return powerPlantsList;
+        return listeCentrales;
     }
     
     public BorderPane getRoot() {
         return root;
     }
     
+    /**
+     * Cree et retourne une Scene contenant cette vue.
+     */
     public Scene createScene() {
         Scene scene = new Scene(root, 1200, 800);
-        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+        String cheminCSS = getClass().getResource("styles.css").toExternalForm();
+        scene.getStylesheets().add(cheminCSS);
         return scene;
     }
 }

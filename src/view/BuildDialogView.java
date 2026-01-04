@@ -2,138 +2,207 @@ package view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import model.PowerPlant;
 import model.PowerPlantType;
 
 /**
- * Dialogue modal pour construire une nouvelle centrale électrique.
- * Permet de sélectionner le type et affiche les coûts.
+ * Dialogue pour construire une nouvelle centrale electrique.
+ * 
+ * Cette fenetre permet au joueur de:
+ * - Voir tous les types de centrales disponibles
+ * - Voir le cout et la production de chaque type
+ * - Choisir le type a construire
+ * 
+ * La classe herite de Dialog<PowerPlantType> ce qui signifie
+ * qu'elle retourne un PowerPlantType quand l'utilisateur fait son choix.
  */
 public class BuildDialogView extends Dialog<PowerPlantType> {
-    private ToggleGroup typeGroup;
-    private Label costLabel;
-    private Label productionLabel;
     
-    public BuildDialogView(int currentResources) {
+    // Groupe de boutons radio (un seul peut etre selectionne)
+    private ToggleGroup groupeBoutons;
+    
+    // Labels pour afficher les infos du type selectionne
+    private Label labelCout;
+    private Label labelProduction;
+    
+    /**
+     * Constructeur du dialogue
+     * 
+     * @param creditsDuJoueur Le nombre de credits actuels du joueur
+     */
+    public BuildDialogView(int creditsDuJoueur) {
+        // On configure le titre et l'en-tete du dialogue
         setTitle("Construire une Centrale");
         setHeaderText("Sélectionnez le type de centrale à construire");
         
-        // Style du dialogue
-        DialogPane dialogPane = getDialogPane();
-        dialogPane.getStyleClass().add("dialog-pane");
+        // On recupere le panneau du dialogue pour le personnaliser
+        DialogPane panneauDialogue = getDialogPane();
+        panneauDialogue.getStyleClass().add("dialog-pane");
         
-        // Contenu
-        VBox content = new VBox(15);
-        content.setPadding(new Insets(20));
+        // On cree le contenu du dialogue
+        VBox contenu = new VBox(15);
+        contenu.setPadding(new Insets(20));
         
-        typeGroup = new ToggleGroup();
+        // On cree le groupe de boutons radio
+        groupeBoutons = new ToggleGroup();
         
-        // Créer un RadioButton pour chaque type de centrale
-        for (PowerPlantType type : PowerPlantType.values()) {
-            RadioButton rb = createPowerPlantOption(type);
-            typeGroup.getToggles().add(rb);
-            content.getChildren().add(rb);
+        // On cree un bouton radio pour chaque type de centrale
+        // PowerPlantType.values() retourne tous les types possibles
+        PowerPlantType[] tousLesTypes = PowerPlantType.values();
+        
+        for (int i = 0; i < tousLesTypes.length; i++) {
+            PowerPlantType type = tousLesTypes[i];
+            RadioButton bouton = creerBoutonCentrale(type);
+            groupeBoutons.getToggles().add(bouton);
+            contenu.getChildren().add(bouton);
         }
         
-        // Sélectionner le premier par défaut
-        if (!typeGroup.getToggles().isEmpty()) {
-            typeGroup.getToggles().get(0).setSelected(true);
+        // On selectionne le premier bouton par defaut
+        if (groupeBoutons.getToggles().size() > 0) {
+            Toggle premierBouton = groupeBoutons.getToggles().get(0);
+            premierBouton.setSelected(true);
         }
         
-        // Informations sur le choix sélectionné
-        VBox infoBox = new VBox(10);
-        infoBox.setPadding(new Insets(15));
-        infoBox.getStyleClass().add("panel");
+        // === PANNEAU D'INFORMATION ===
+        VBox panneauInfo = new VBox(10);
+        panneauInfo.setPadding(new Insets(15));
+        panneauInfo.getStyleClass().add("panel");
         
-        costLabel = new Label();
-        costLabel.getStyleClass().add("label-stat");
+        labelCout = new Label();
+        labelCout.getStyleClass().add("label-stat");
         
-        productionLabel = new Label();
-        productionLabel.getStyleClass().add("label-stat");
+        labelProduction = new Label();
+        labelProduction.getStyleClass().add("label-stat");
         
-        Label resourcesLabel = new Label("Ressources disponibles: " + currentResources + " crédits");
-        resourcesLabel.setStyle("-fx-text-fill: #00d4ff;");
+        Label labelCredits = new Label("Ressources disponibles: " + creditsDuJoueur + " crédits");
+        labelCredits.setStyle("-fx-text-fill: #00d4ff;");
         
-        infoBox.getChildren().addAll(costLabel, productionLabel, resourcesLabel);
+        panneauInfo.getChildren().add(labelCout);
+        panneauInfo.getChildren().add(labelProduction);
+        panneauInfo.getChildren().add(labelCredits);
         
-        content.getChildren().add(infoBox);
+        contenu.getChildren().add(panneauInfo);
         
-        // Mettre à jour les infos quand la sélection change
-        typeGroup.selectedToggleProperty().addListener((obs, old, newToggle) -> {
-            if (newToggle != null) {
-                updateInfo();
+        // On ecoute les changements de selection
+        // Quand l'utilisateur change de bouton, on met a jour les infos
+        groupeBoutons.selectedToggleProperty().addListener(
+            (observable, ancienneValeur, nouvelleValeur) -> {
+                if (nouvelleValeur != null) {
+                    mettreAJourInfos();
+                }
             }
-        });
+        );
         
-        updateInfo(); // Affichage initial
+        // On affiche les infos du premier type selectionne
+        mettreAJourInfos();
         
-        dialogPane.setContent(content);
+        // On ajoute le contenu au dialogue
+        panneauDialogue.setContent(contenu);
         
-        // Boutons
-        ButtonType buildButtonType = new ButtonType("Construire", ButtonBar.ButtonData.OK_DONE);
-        dialogPane.getButtonTypes().addAll(buildButtonType, ButtonType.CANCEL);
+        // === BOUTONS DU DIALOGUE ===
+        // On cree un bouton "Construire"
+        ButtonType boutonConstruire = new ButtonType("Construire", ButtonBar.ButtonData.OK_DONE);
+        panneauDialogue.getButtonTypes().add(boutonConstruire);
+        panneauDialogue.getButtonTypes().add(ButtonType.CANCEL);
         
-        // Convertir le résultat
-        setResultConverter(buttonType -> {
-            if (buttonType == buildButtonType && typeGroup.getSelectedToggle() != null) {
-                return (PowerPlantType) typeGroup.getSelectedToggle().getUserData();
+        // On configure ce que le dialogue retourne
+        // Si l'utilisateur clique sur "Construire", on retourne le type selectionne
+        // Sinon, on retourne null
+        setResultConverter(typeBouton -> {
+            if (typeBouton == boutonConstruire) {
+                Toggle selection = groupeBoutons.getSelectedToggle();
+                if (selection != null) {
+                    // getUserData() retourne le type qu'on a stocke dans le bouton
+                    return (PowerPlantType) selection.getUserData();
+                }
             }
             return null;
         });
         
-        // Charger le style
+        // On charge le fichier CSS
         try {
-            dialogPane.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+            String cheminCSS = getClass().getResource("styles.css").toExternalForm();
+            panneauDialogue.getStylesheets().add(cheminCSS);
         } catch (Exception e) {
             System.err.println("Impossible de charger styles.css: " + e.getMessage());
         }
     }
     
-    private RadioButton createPowerPlantOption(PowerPlantType type) {
-        RadioButton rb = new RadioButton();
-        rb.setUserData(type);
+    /**
+     * Cree un bouton radio pour un type de centrale.
+     * 
+     * @param type Le type de centrale
+     * @return Le bouton radio configure
+     */
+    private RadioButton creerBoutonCentrale(PowerPlantType type) {
+        RadioButton bouton = new RadioButton();
         
-        // Créer un HBox pour l'icône et les détails
-        HBox container = new HBox(15);
-        container.setAlignment(Pos.CENTER_LEFT);
-        container.setPadding(new Insets(10));
-        container.getStyleClass().add("panel");
+        // On stocke le type dans le bouton pour le recuperer plus tard
+        bouton.setUserData(type);
         
-        Label iconLabel = new Label(type.getIcon());
-        iconLabel.getStyleClass().add("icon-label");
+        // On cree un conteneur horizontal pour l'icone et les details
+        HBox conteneur = new HBox(15);
+        conteneur.setAlignment(Pos.CENTER_LEFT);
+        conteneur.setPadding(new Insets(10));
+        conteneur.getStyleClass().add("panel");
         
+        // Icone de la centrale
+        Label labelIcone = new Label(type.getIcon());
+        labelIcone.getStyleClass().add("icon-label");
+        
+        // Details de la centrale
         VBox details = new VBox(5);
-        Label nameLabel = new Label(type.getName());
-        nameLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         
-        int cost = model.PowerPlant.getBuildCost(type);
-        double production = model.PowerPlant.getBaseProduction(type);
+        Label labelNom = new Label(type.getName());
+        labelNom.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         
-        Label costInfoLabel = new Label(String.format("Coût: %d cr | Production: %.0f kW", cost, production));
-        costInfoLabel.getStyleClass().add("label-secondary");
+        // On recupere le cout et la production
+        int cout = PowerPlant.getBuildCost(type);
+        double production = PowerPlant.getBaseProduction(type);
         
-        details.getChildren().addAll(nameLabel, costInfoLabel);
+        Label labelInfo = new Label("Coût: " + cout + " cr | Production: " + Math.round(production) + " kW");
+        labelInfo.getStyleClass().add("label-secondary");
         
-        container.getChildren().addAll(iconLabel, details);
+        details.getChildren().add(labelNom);
+        details.getChildren().add(labelInfo);
         
-        rb.setGraphic(container);
-        rb.getStyleClass().add("radio-button");
+        conteneur.getChildren().add(labelIcone);
+        conteneur.getChildren().add(details);
         
-        return rb;
+        // On met le conteneur comme graphique du bouton radio
+        bouton.setGraphic(conteneur);
+        bouton.getStyleClass().add("radio-button");
+        
+        return bouton;
     }
     
-    private void updateInfo() {
-        Toggle selected = typeGroup.getSelectedToggle();
-        if (selected != null) {
-            PowerPlantType type = (PowerPlantType) selected.getUserData();
-            int cost = model.PowerPlant.getBuildCost(type);
-            double production = model.PowerPlant.getBaseProduction(type);
+    /**
+     * Met a jour les informations affichees selon le type selectionne.
+     */
+    private void mettreAJourInfos() {
+        Toggle selection = groupeBoutons.getSelectedToggle();
+        
+        if (selection != null) {
+            // On recupere le type stocke dans le bouton
+            PowerPlantType type = (PowerPlantType) selection.getUserData();
             
-            costLabel.setText("💰 Coût de construction: " + cost + " crédits");
-            productionLabel.setText("⚡ Production: " + String.format("%.0f", production) + " kW");
+            // On recupere les valeurs
+            int cout = PowerPlant.getBuildCost(type);
+            double production = PowerPlant.getBaseProduction(type);
+            
+            // On met a jour les labels
+            labelCout.setText("💰 Coût de construction: " + cout + " crédits");
+            labelProduction.setText("⚡ Production: " + Math.round(production) + " kW");
         }
     }
 }

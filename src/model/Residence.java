@@ -3,140 +3,256 @@ package model;
 import java.util.Random;
 
 /**
- * Classe représentant une résidence dans la colonie spatiale.
- * Chaque résidence a un niveau qui détermine ses besoins en énergie et son pouvoir d'achat.
+ * Cette classe represente une residence (un batiment ou vivent des habitants).
+ * 
+ * Chaque residence a:
+ * - Un identifiant unique (id)
+ * - Un niveau (1, 2 ou 3) - plus le niveau est haut, plus il y a d'habitants
+ * - Un besoin en energie (en kW) - combien d'electricite la residence demande
+ * - Un pouvoir d'achat - combien les habitants payent pour l'electricite
+ * - Une satisfaction - si les habitants sont contents (de 0.0 a 1.0)
  */
 public class Residence {
-    private static final Random random = new Random();
     
-    // Attributs de la résidence
-    private int id;
-    private int level; // Niveau de la résidence (1 à 3)
-    private int inhabitants; // Nombre d'habitants
-    private double energyNeed; // Besoin énergétique par cycle (kW)
-    private double purchasingPower; // Pouvoir d'achat électrique (crédits par kW)
-    private double satisfaction; // Niveau de satisfaction (0.0 à 1.0)
+    // On utilise Random pour generer des nombres aleatoires
+    private Random random;
     
-    // Plages de valeurs selon le niveau
-    private static final int[][] ENERGY_RANGES = {
-        {50, 100},   // Niveau 1: 50-100 kW
-        {100, 200},  // Niveau 2: 100-200 kW
-        {200, 350}   // Niveau 3: 200-350 kW
-    };
-    
-    private static final double[][] PURCHASE_POWER_RANGES = {
-        {0.8, 1.2},   // Niveau 1: 0.8-1.2 crédits/kW
-        {1.5, 2.0},   // Niveau 2: 1.5-2.0 crédits/kW
-        {2.5, 3.5}    // Niveau 3: 2.5-3.5 crédits/kW
-    };
-    
-    private static final int[][] INHABITANTS_RANGES = {
-        {10, 30},    // Niveau 1
-        {30, 60},    // Niveau 2
-        {60, 100}    // Niveau 3
-    };
+    // Les attributs (caracteristiques) de la residence
+    private int id;                // Numero unique de la residence
+    private int level;             // Niveau: 1, 2 ou 3
+    private int inhabitants;       // Nombre d'habitants
+    private double energyNeed;     // Besoin en electricite (kW)
+    private double purchasingPower; // Combien ils payent par kW
+    private double satisfaction;   // Niveau de satisfaction (0.0 a 1.0)
     
     /**
-     * Constructeur d'une résidence
-     * @param id Identifiant unique
-     * @param level Niveau de la résidence (1-3)
+     * Constructeur: cree une nouvelle residence
+     * 
+     * @param id L'identifiant unique de la residence
+     * @param level Le niveau (doit etre 1, 2 ou 3)
      */
     public Residence(int id, int level) {
-        if (level < 1 || level > 3) {
-            throw new IllegalArgumentException("Le niveau doit être entre 1 et 3");
+        // On cree notre generateur de nombres aleatoires
+        this.random = new Random();
+        
+        // On verifie que le niveau est valide
+        if (level < 1) {
+            level = 1;  // Si trop bas, on met 1
+        }
+        if (level > 3) {
+            level = 3;  // Si trop haut, on met 3
         }
         
+        // On enregistre l'id et le niveau
         this.id = id;
         this.level = level;
         
-        // Initialisation avec des valeurs aléatoires dans les plages
-        int[] energyRange = ENERGY_RANGES[level - 1];
-        this.energyNeed = energyRange[0] + random.nextDouble() * (energyRange[1] - energyRange[0]);
+        // On calcule les valeurs en fonction du niveau
+        // On utilise des conditions if/else simples
         
-        double[] powerRange = PURCHASE_POWER_RANGES[level - 1];
-        this.purchasingPower = powerRange[0] + random.nextDouble() * (powerRange[1] - powerRange[0]);
+        // Calcul du besoin en energie
+        if (level == 1) {
+            // Niveau 1: entre 50 et 100 kW
+            int minimum = 50;
+            int maximum = 100;
+            this.energyNeed = minimum + random.nextDouble() * (maximum - minimum);
+        } else if (level == 2) {
+            // Niveau 2: entre 100 et 200 kW
+            int minimum = 100;
+            int maximum = 200;
+            this.energyNeed = minimum + random.nextDouble() * (maximum - minimum);
+        } else {
+            // Niveau 3: entre 200 et 350 kW
+            int minimum = 200;
+            int maximum = 350;
+            this.energyNeed = minimum + random.nextDouble() * (maximum - minimum);
+        }
         
-        int[] inhabitantsRange = INHABITANTS_RANGES[level - 1];
-        this.inhabitants = inhabitantsRange[0] + random.nextInt(inhabitantsRange[1] - inhabitantsRange[0] + 1);
+        // Calcul du pouvoir d'achat (combien ils payent par kW)
+        if (level == 1) {
+            // Niveau 1: entre 0.8 et 1.2 credits par kW
+            double min = 0.8;
+            double max = 1.2;
+            this.purchasingPower = min + random.nextDouble() * (max - min);
+        } else if (level == 2) {
+            // Niveau 2: entre 1.5 et 2.0 credits par kW
+            double min = 1.5;
+            double max = 2.0;
+            this.purchasingPower = min + random.nextDouble() * (max - min);
+        } else {
+            // Niveau 3: entre 2.5 et 3.5 credits par kW
+            double min = 2.5;
+            double max = 3.5;
+            this.purchasingPower = min + random.nextDouble() * (max - min);
+        }
         
-        // Satisfaction initiale élevée
-        this.satisfaction = 0.8 + random.nextDouble() * 0.2; // 0.8 à 1.0
+        // Calcul du nombre d'habitants
+        if (level == 1) {
+            // Niveau 1: entre 10 et 30 habitants
+            int min = 10;
+            int max = 30;
+            this.inhabitants = min + random.nextInt(max - min + 1);
+        } else if (level == 2) {
+            // Niveau 2: entre 30 et 60 habitants
+            int min = 30;
+            int max = 60;
+            this.inhabitants = min + random.nextInt(max - min + 1);
+        } else {
+            // Niveau 3: entre 60 et 100 habitants
+            int min = 60;
+            int max = 100;
+            this.inhabitants = min + random.nextInt(max - min + 1);
+        }
+        
+        // Satisfaction initiale: entre 80% et 100%
+        this.satisfaction = 0.8 + random.nextDouble() * 0.2;
     }
     
     /**
-     * Met à jour la satisfaction en fonction de l'énergie reçue
-     * @param energyReceived Énergie effectivement reçue
+     * Met a jour la satisfaction en fonction de l'energie recue.
+     * Si on recoit assez d'energie, les habitants sont contents.
+     * Si on n'en recoit pas assez, ils sont mecontents.
+     * 
+     * @param energyReceived L'energie effectivement recue (en kW)
      */
     public void updateSatisfaction(double energyReceived) {
+        // On calcule le ratio: energie recue / energie demandee
         double ratio = energyReceived / energyNeed;
         
+        // On ajuste la satisfaction selon le ratio
         if (ratio >= 1.0) {
-            // Énergie suffisante: satisfaction augmente légèrement
-            satisfaction = Math.min(1.0, satisfaction + 0.05);
+            // On a recu assez d'energie: satisfaction augmente de 5%
+            satisfaction = satisfaction + 0.05;
+            // Mais on ne depasse pas 1.0 (100%)
+            if (satisfaction > 1.0) {
+                satisfaction = 1.0;
+            }
         } else if (ratio >= 0.8) {
-            // Légèrement insuffisant: satisfaction stable
-            satisfaction = Math.max(0.0, satisfaction - 0.02);
+            // On a recu presque assez: satisfaction baisse un peu
+            satisfaction = satisfaction - 0.02;
+            // On ne descend pas en dessous de 0
+            if (satisfaction < 0.0) {
+                satisfaction = 0.0;
+            }
         } else if (ratio >= 0.5) {
-            // Insuffisant: satisfaction diminue
-            satisfaction = Math.max(0.0, satisfaction - 0.1);
+            // On n'a pas recu assez: satisfaction baisse de 10%
+            satisfaction = satisfaction - 0.1;
+            if (satisfaction < 0.0) {
+                satisfaction = 0.0;
+            }
         } else {
-            // Très insuffisant: satisfaction diminue fortement
-            satisfaction = Math.max(0.0, satisfaction - 0.2);
+            // On a recu tres peu: satisfaction baisse beaucoup (20%)
+            satisfaction = satisfaction - 0.2;
+            if (satisfaction < 0.0) {
+                satisfaction = 0.0;
+            }
         }
     }
     
     /**
-     * Calcule le revenu généré par cette résidence
-     * @param energyProvided Énergie fournie à la résidence
-     * @return Montant en crédits
+     * Calcule combien d'argent cette residence va payer.
+     * Le revenu depend de l'energie fournie et du pouvoir d'achat.
+     * 
+     * @param energyProvided L'energie qu'on leur donne
+     * @return Le montant en credits
      */
     public double calculateRevenue(double energyProvided) {
-        // Le revenu est basé sur l'énergie effectivement fournie
-        double actualEnergy = Math.min(energyProvided, energyNeed);
-        return actualEnergy * purchasingPower;
+        // On ne peut pas facturer plus que ce qu'ils demandent
+        double energieAFacturer;
+        if (energyProvided > energyNeed) {
+            energieAFacturer = energyNeed;
+        } else {
+            energieAFacturer = energyProvided;
+        }
+        
+        // Le revenu = energie * prix par kW
+        double revenu = energieAFacturer * purchasingPower;
+        return revenu;
     }
     
     /**
-     * Simule une croissance de la population (peut augmenter les besoins)
+     * Simule une croissance de la population.
+     * Si les habitants sont contents, la population peut augmenter.
      */
     public void simulateGrowth() {
-        // Probabilité de croissance dépend de la satisfaction
-        if (random.nextDouble() < satisfaction * 0.1) {
-            // Augmentation des besoins de 2 à 5%
-            double growthFactor = 1.02 + random.nextDouble() * 0.03;
-            energyNeed *= growthFactor;
-            inhabitants = (int) (inhabitants * growthFactor);
+        // On tire un nombre aleatoire entre 0 et 1
+        double hasard = random.nextDouble();
+        
+        // Chance de croissance = satisfaction * 10%
+        // Ex: si satisfaction = 0.8, alors chance = 8%
+        double chanceDeCroissance = satisfaction * 0.1;
+        
+        // Si le hasard est inferieur a la chance, on grandit
+        if (hasard < chanceDeCroissance) {
+            // Facteur de croissance entre 2% et 5%
+            double facteur = 1.02 + random.nextDouble() * 0.03;
+            
+            // On augmente le besoin en energie
+            energyNeed = energyNeed * facteur;
+            
+            // On augmente le nombre d'habitants
+            inhabitants = (int) (inhabitants * facteur);
         }
     }
     
-    // Getters
+    // ========================================
+    // GETTERS: methodes pour lire les valeurs
+    // ========================================
+    
+    /**
+     * Retourne l'identifiant de la residence
+     */
     public int getId() {
         return id;
     }
     
+    /**
+     * Retourne le niveau de la residence (1, 2 ou 3)
+     */
     public int getLevel() {
         return level;
     }
     
+    /**
+     * Retourne le nombre d'habitants
+     */
     public int getInhabitants() {
         return inhabitants;
     }
     
+    /**
+     * Retourne le besoin en energie (en kW)
+     */
     public double getEnergyNeed() {
         return energyNeed;
     }
     
+    /**
+     * Retourne le pouvoir d'achat (credits par kW)
+     */
     public double getPurchasingPower() {
         return purchasingPower;
     }
     
+    /**
+     * Retourne la satisfaction (entre 0.0 et 1.0)
+     */
     public double getSatisfaction() {
         return satisfaction;
     }
     
+    /**
+     * Retourne une description textuelle de la residence.
+     * Cette methode est appelee automatiquement quand on fait System.out.println(residence)
+     */
     @Override
     public String toString() {
-        return String.format("Résidence #%d (Niv.%d) - %d hab. - Besoin: %.1f kW - Satisfaction: %.0f%%",
-                id, level, inhabitants, energyNeed, satisfaction * 100);
+        // On cree une chaine de caracteres avec les infos importantes
+        String description = "Résidence #" + id 
+            + " (Niv." + level + ")"
+            + " - " + inhabitants + " hab."
+            + " - Besoin: " + Math.round(energyNeed) + " kW"
+            + " - Satisfaction: " + Math.round(satisfaction * 100) + "%";
+        return description;
     }
 }
