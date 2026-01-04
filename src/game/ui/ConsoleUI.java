@@ -544,10 +544,15 @@ public class ConsoleUI {
     }
     
     /**
-     * Clear screen (simple version).
+     * Clear screen using ANSI escape codes.
+     * Falls back to printing blank lines if ANSI not supported.
      */
     private void clearScreen() {
-        System.out.println("\n".repeat(2));
+        // Try ANSI escape codes first (works on most terminals)
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        // Also print some newlines as fallback for terminals that don't support ANSI
+        System.out.println("\n".repeat(3));
     }
     
     /**

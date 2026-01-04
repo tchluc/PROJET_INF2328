@@ -116,8 +116,14 @@ public class City {
      * Returns the total revenue from energy sales.
      */
     public double distributeEnergy() {
-        double totalProduction = getTotalEnergyProduction();
-        double totalDemand = getTotalEnergyDemand();
+        return distributeEnergyWithProduction(getTotalEnergyProduction(), getTotalEnergyDemand());
+    }
+    
+    /**
+     * Distribute energy to residences with specified production and demand.
+     * Returns the total revenue from energy sales.
+     */
+    public double distributeEnergyWithProduction(double totalProduction, double totalDemand) {
         double revenue = 0;
         
         if (totalDemand == 0) {
@@ -126,35 +132,31 @@ public class City {
         
         double coverageRatio = totalProduction / totalDemand;
         
+        // Calculate pollution penalty for satisfaction (if pollution > 50)
+        double pollutionPenalty = pollution > 50 ? (pollution - 50) / 100.0 : 0;
+        
         // Distribute energy proportionally to each residence
         for (Residence residence : residences) {
             double demand = residence.getEnergyDemand();
             double energyReceived;
+            double effectiveCoverage;
             
             if (coverageRatio >= 1.0) {
                 // Enough energy for everyone
                 energyReceived = demand;
-                residence.updateSatisfaction(true, 1.0);
+                effectiveCoverage = 1.0 - pollutionPenalty;
             } else {
                 // Not enough energy - distribute proportionally
                 energyReceived = demand * coverageRatio;
-                residence.updateSatisfaction(coverageRatio >= 0.5, coverageRatio);
+                effectiveCoverage = Math.max(0, coverageRatio - pollutionPenalty);
             }
             
+            residence.updateSatisfaction(coverageRatio >= 0.5, effectiveCoverage);
             revenue += residence.calculatePayment(energyReceived);
         }
         
         // Update pollution
         pollution = Math.min(100, pollution + getTotalPollution() * 0.1);
-        
-        // Pollution affects happiness
-        if (pollution > 50) {
-            for (Residence residence : residences) {
-                // Extra happiness penalty from pollution
-                residence.updateSatisfaction(residence.isPowered(), 
-                        residence.isPowered() ? (1.0 - (pollution - 50) / 100.0) : 0);
-            }
-        }
         
         return revenue;
     }

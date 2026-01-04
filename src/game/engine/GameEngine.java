@@ -61,12 +61,12 @@ public class GameEngine {
         city.applyWeatherEffects();
         applyEventEffects();
         
-        // Calculate production and demand
-        double production = city.getTotalEnergyProduction() * getProductionModifier();
+        // Calculate production (with per-plant-type modifiers) and demand
+        double production = calculateTotalProductionWithModifiers();
         double demand = city.getTotalEnergyDemand() * demandModifier;
         
         // Distribute energy and calculate revenue
-        double revenue = city.distributeEnergy();
+        double revenue = city.distributeEnergyWithProduction(production, demand);
         double operatingCosts = city.getTotalOperatingCosts() * costModifier;
         
         // Update player resources
@@ -82,6 +82,9 @@ public class GameEngine {
             GameEvent newEvent = GameEvent.generateRandomEvent();
             activeEvents.add(newEvent);
             result.addMessage("📢 Nouvel événement: " + newEvent.getType().getName());
+            
+            // Handle one-time event effects when they start
+            handleNewEventEffect(newEvent, result);
         }
         
         // Update date
@@ -229,9 +232,22 @@ public class GameEngine {
                     solarModifier *= 1.15;
                     windModifier *= 1.15;
                 }
-                case GOVERNMENT_SUBSIDY -> player.earn(500); // One-time bonus
+                // GOVERNMENT_SUBSIDY is handled as a one-time effect in handleNewEventEffect
                 default -> {}
             }
+        }
+    }
+    
+    /**
+     * Handle one-time effects when a new event starts.
+     */
+    private void handleNewEventEffect(GameEvent event, SimulationResult result) {
+        switch (event.getType()) {
+            case GOVERNMENT_SUBSIDY -> {
+                player.earn(500);
+                result.addMessage("💰 Vous recevez 500€ de subvention!");
+            }
+            default -> {}
         }
     }
     
@@ -240,22 +256,36 @@ public class GameEngine {
      */
     private void applyEventEffects() {
         for (PowerPlant plant : city.getPowerPlants()) {
-            double baseEfficiency = plant.getProductionEfficiency();
             switch (plant.getType()) {
-                case SOLAR -> plant.applyWeatherEffect();
-                case WIND -> plant.applyWeatherEffect();
-                default -> {}
+                case SOLAR, WIND -> plant.applyWeatherEffect();
+                default -> {} // Other plants don't have weather effects
             }
         }
     }
     
     /**
-     * Get combined production modifier.
+     * Get production modifier for a specific plant type based on active events.
      */
-    private double getProductionModifier() {
-        // Return average of solar and wind modifiers for simplicity
-        // In reality, each plant type would have its own modifier
-        return (solarModifier + windModifier) / 2;
+    public double getProductionModifierForType(PlantType type) {
+        return switch (type) {
+            case SOLAR -> solarModifier;
+            case WIND -> windModifier;
+            default -> 1.0; // Coal, Nuclear, Hydro are not affected by weather events
+        };
+    }
+    
+    /**
+     * Calculate total production with per-plant-type modifiers.
+     */
+    private double calculateTotalProductionWithModifiers() {
+        double totalProduction = 0;
+        for (PowerPlant plant : city.getPowerPlants()) {
+            if (plant.isOperational()) {
+                double modifier = getProductionModifierForType(plant.getType());
+                totalProduction += plant.getActualProduction() * modifier;
+            }
+        }
+        return totalProduction;
     }
     
     /**
