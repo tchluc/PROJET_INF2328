@@ -2,250 +2,326 @@ package controller;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
 import model.*;
 import view.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Contrôleur du jeu - Gère l'interaction entre le Model et la View.
- * Traite les actions de l'utilisateur et met à jour l'interface.
+ * Controleur du jeu - Fait le lien entre le Modele et la Vue.
+ * 
+ * Cette classe gere les interactions de l'utilisateur:
+ * - Quand le joueur clique sur un bouton, c'est ici qu'on reagit
+ * - On met a jour l'interface apres chaque action
+ * 
+ * C'est le "chef d'orchestre" de l'application.
  */
 public class GameController {
+    
+    // Le moteur de jeu (logique du jeu)
     private GameEngine gameEngine;
+    
+    // La vue principale (interface graphique)
     private MainGameView mainGameView;
+    
+    // L'application (pour changer d'ecran)
     private GameApplication application;
     
+    /**
+     * Constructeur du controleur
+     * 
+     * @param application L'application principale
+     */
     public GameController(GameApplication application) {
+        // On sauvegarde la reference vers l'application
         this.application = application;
+        
+        // On cree le moteur de jeu avec le nom de la colonie
         this.gameEngine = new GameEngine("Nova-7");
+        
+        // On cree la vue principale
         this.mainGameView = new MainGameView();
         
-        setupEventHandlers();
-        updateView();
+        // On configure les boutons pour qu'ils reagissent aux clics
+        configurerBoutons();
+        
+        // On affiche l'etat initial
+        mettreAJourVue();
     }
     
     /**
-     * Configure les gestionnaires d'événements pour tous les boutons
+     * Configure les boutons pour qu'ils appellent les bonnes methodes quand on clique.
      */
-    private void setupEventHandlers() {
-        // Bouton construire centrale
-        mainGameView.getBuildButton().setOnAction(e -> handleBuildPowerPlant());
+    private void configurerBoutons() {
+        // Bouton "Construire Centrale"
+        // Quand on clique, on appelle la methode gererConstructionCentrale()
+        mainGameView.getBuildButton().setOnAction(e -> gererConstructionCentrale());
         
-        // Bouton améliorer centrale
-        mainGameView.getUpgradeButton().setOnAction(e -> handleUpgradePowerPlant());
+        // Bouton "Ameliorer Centrale"
+        mainGameView.getUpgradeButton().setOnAction(e -> gererAmeliorationCentrale());
         
-        // Bouton voir détails
-        mainGameView.getDetailsButton().setOnAction(e -> handleShowDetails());
+        // Bouton "Voir Details"
+        mainGameView.getDetailsButton().setOnAction(e -> afficherDetails());
         
-        // Bouton cycle suivant
-        mainGameView.getNextCycleButton().setOnAction(e -> handleNextCycle());
+        // Bouton "Cycle Suivant"
+        mainGameView.getNextCycleButton().setOnAction(e -> passerCycleSuivant());
     }
     
     /**
-     * Gère la construction d'une nouvelle centrale
+     * Gere la construction d'une nouvelle centrale.
+     * Cette methode est appelee quand le joueur clique sur "Construire Centrale"
      */
-    private void handleBuildPowerPlant() {
+    private void gererConstructionCentrale() {
+        // On recupere l'etat du jeu
         GameState gameState = gameEngine.getGameState();
         
-        // Ouvrir le dialogue de construction
+        // On ouvre la fenetre de dialogue pour choisir le type de centrale
         BuildDialogView dialog = new BuildDialogView(gameState.getResources());
-        Optional<PowerPlantType> result = dialog.showAndWait();
         
-        result.ifPresent(type -> {
-            boolean success = gameEngine.buildPowerPlant(type);
+        // showAndWait() attend que l'utilisateur fasse un choix
+        java.util.Optional<PowerPlantType> resultat = dialog.showAndWait();
+        
+        // On verifie si l'utilisateur a choisi quelque chose
+        if (resultat.isPresent()) {
+            // Il a choisi un type de centrale
+            PowerPlantType typeChoisi = resultat.get();
             
-            if (!success) {
-                showAlert("Construction Impossible", 
-                         "Ressources insuffisantes pour construire une centrale " + type.getName() + ".",
-                         Alert.AlertType.WARNING);
+            // On essaye de construire
+            boolean reussite = gameEngine.buildPowerPlant(typeChoisi);
+            
+            // Si ca n'a pas marche, on affiche un message d'erreur
+            if (reussite == false) {
+                afficherAlerte("Construction Impossible", 
+                    "Ressources insuffisantes pour construire une centrale " + typeChoisi.getName() + ".",
+                    Alert.AlertType.WARNING);
             }
             
-            updateView();
-        });
+            // On met a jour l'affichage
+            mettreAJourVue();
+        }
+        // Si resultat n'est pas present, l'utilisateur a annule -> on ne fait rien
     }
     
     /**
-     * Gère l'amélioration d'une centrale existante
+     * Gere l'amelioration d'une centrale existante.
      */
-    private void handleUpgradePowerPlant() {
+    private void gererAmeliorationCentrale() {
         GameState gameState = gameEngine.getGameState();
         City city = gameState.getCity();
-        List<PowerPlant> powerPlants = city.getPowerPlants();
         
-        if (powerPlants.isEmpty()) {
-            showAlert("Aucune Centrale", 
-                     "Il n'y a aucune centrale à améliorer. Construisez-en une d'abord !",
-                     Alert.AlertType.INFORMATION);
-            return;
+        // On recupere la liste des centrales
+        List<PowerPlant> centrales = city.getPowerPlants();
+        
+        // S'il n'y a pas de centrale, on affiche un message
+        if (centrales.size() == 0) {
+            afficherAlerte("Aucune Centrale", 
+                "Il n'y a aucune centrale à améliorer. Construisez-en une d'abord !",
+                Alert.AlertType.INFORMATION);
+            return;  // On sort de la methode
         }
         
-        // Créer une liste de choix
-        List<String> choices = new ArrayList<>();
-        for (PowerPlant plant : powerPlants) {
-            String choice = String.format("%s #%d (Niv.%d) - %.0f kW", 
-                    plant.getType().getIcon(),
-                    plant.getId(),
-                    plant.getLevel(),
-                    plant.getProduction());
+        // On cree une liste de choix pour l'utilisateur
+        ArrayList<String> choix = new ArrayList<String>();
+        
+        for (int i = 0; i < centrales.size(); i++) {
+            PowerPlant centrale = centrales.get(i);
             
-            if (!plant.canUpgrade()) {
-                choice += " [MAX]";
+            // On cree une description de la centrale
+            String description = centrale.getType().getIcon() + " #" + centrale.getId() 
+                + " (Niv." + centrale.getLevel() + ")"
+                + " - " + Math.round(centrale.getProduction()) + " kW";
+            
+            // On ajoute l'info sur l'amelioration
+            if (centrale.canUpgrade() == false) {
+                description = description + " [MAX]";
             } else {
-                choice += String.format(" [Coût amélioration: %d cr]", plant.getUpgradeCost());
+                description = description + " [Coût amélioration: " + centrale.getUpgradeCost() + " cr]";
             }
             
-            choices.add(choice);
+            choix.add(description);
         }
         
-        // Afficher le dialogue de choix
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
+        // On cree une fenetre de dialogue avec la liste de choix
+        ChoiceDialog<String> dialog = new ChoiceDialog<String>(choix.get(0), choix);
         dialog.setTitle("Améliorer une Centrale");
         dialog.setHeaderText("Sélectionnez la centrale à améliorer:");
         dialog.setContentText("Centrale:");
         
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(choice -> {
-            int index = choices.indexOf(choice);
-            PowerPlant selectedPlant = powerPlants.get(index);
+        // On attend le choix de l'utilisateur
+        java.util.Optional<String> resultat = dialog.showAndWait();
+        
+        if (resultat.isPresent()) {
+            // L'utilisateur a choisi une centrale
+            String choixUtilisateur = resultat.get();
             
-            boolean success = gameEngine.upgradePowerPlant(selectedPlant);
-            
-            if (!success && !selectedPlant.canUpgrade()) {
-                showAlert("Amélioration Impossible", 
-                         "Cette centrale est déjà au niveau maximum !",
-                         Alert.AlertType.INFORMATION);
+            // On trouve l'index de ce choix dans la liste
+            int index = -1;
+            for (int i = 0; i < choix.size(); i++) {
+                if (choix.get(i).equals(choixUtilisateur)) {
+                    index = i;
+                    break;
+                }
             }
             
-            updateView();
-        });
-    }
-    
-    /**
-     * Affiche les détails du jeu
-     */
-    private void handleShowDetails() {
-        GameState gameState = gameEngine.getGameState();
-        City city = gameState.getCity();
-        
-        String details = String.format(
-            "STATISTIQUES DÉTAILLÉES\n\n" +
-            "Colonie: %s\n" +
-            "Cycle: %d\n" +
-            "Ressources: %d crédits\n" +
-            "Bonheur: %.0f%% (%s)\n\n" +
-            "Population: %d habitants\n" +
-            "Résidences: %d\n" +
-            "Centrales: %d\n\n" +
-            "Production totale: %.0f kW\n" +
-            "Demande totale: %.0f kW\n" +
-            "Balance: %.0f kW\n" +
-            "Ratio: %.1f%%\n\n" +
-            "Coût d'entretien: %d crédits/cycle",
-            city.getName(),
-            gameState.getCurrentCycle(),
-            gameState.getResources(),
-            gameState.getHappiness() * 100,
-            gameState.getHappinessStatus(),
-            city.getTotalPopulation(),
-            city.getResidenceCount(),
-            city.getPowerPlantCount(),
-            city.getTotalEnergyProduction(),
-            city.getTotalEnergyDemand(),
-            gameState.getEnergyBalance(),
-            gameState.getEnergyRatio() * 100,
-            city.getTotalMaintenanceCost()
-        );
-        
-        showAlert("Détails de la Colonie", details, Alert.AlertType.INFORMATION);
-    }
-    
-    /**
-     * Passe au cycle suivant
-     */
-    private void handleNextCycle() {
-        // Traiter le cycle
-        gameEngine.processCycle();
-        
-        // Mettre à jour l'affichage
-        updateView();
-        
-        // Vérifier game over
-        if (gameEngine.getGameState().isGameOver()) {
-            handleGameOver();
+            // On recupere la centrale correspondante
+            if (index >= 0) {
+                PowerPlant centraleChoisie = centrales.get(index);
+                
+                // On essaye d'ameliorer
+                boolean reussite = gameEngine.upgradePowerPlant(centraleChoisie);
+                
+                if (reussite == false && centraleChoisie.canUpgrade() == false) {
+                    afficherAlerte("Amélioration Impossible", 
+                        "Cette centrale est déjà au niveau maximum !",
+                        Alert.AlertType.INFORMATION);
+                }
+            }
+            
+            // On met a jour l'affichage
+            mettreAJourVue();
         }
     }
     
     /**
-     * Gère la fin du jeu
+     * Affiche les details du jeu dans une fenetre.
      */
-    private void handleGameOver() {
-        Platform.runLater(() -> {
-            GameState gameState = gameEngine.getGameState();
-            City city = gameState.getCity();
-            
-            GameOverView gameOverView = new GameOverView();
-            gameOverView.setGameOverInfo(
-                gameState.getGameOverReason(),
-                gameState.getCurrentCycle(),
-                gameState.getResources(),
-                gameState.getHappiness(),
-                city.getTotalPopulation()
-            );
-            
-            // Gérer les boutons
-            gameOverView.getNewGameButton().setOnAction(e -> {
-                restartGame();
-            });
-            
-            gameOverView.getQuitButton().setOnAction(e -> {
-                Platform.exit();
-            });
-            
-            // Afficher la vue Game Over
-            application.showGameOver(gameOverView);
-        });
+    private void afficherDetails() {
+        GameState gameState = gameEngine.getGameState();
+        City city = gameState.getCity();
+        
+        // On construit le texte des details
+        String details = "STATISTIQUES DÉTAILLÉES\n\n"
+            + "Colonie: " + city.getName() + "\n"
+            + "Cycle: " + gameState.getCurrentCycle() + "\n"
+            + "Ressources: " + gameState.getResources() + " crédits\n"
+            + "Bonheur: " + Math.round(gameState.getHappiness() * 100) + "% (" + gameState.getHappinessStatus() + ")\n\n"
+            + "Population: " + city.getTotalPopulation() + " habitants\n"
+            + "Résidences: " + city.getResidenceCount() + "\n"
+            + "Centrales: " + city.getPowerPlantCount() + "\n\n"
+            + "Production totale: " + Math.round(city.getTotalEnergyProduction()) + " kW\n"
+            + "Demande totale: " + Math.round(city.getTotalEnergyDemand()) + " kW\n"
+            + "Balance: " + Math.round(gameState.getEnergyBalance()) + " kW\n"
+            + "Ratio: " + Math.round(gameState.getEnergyRatio() * 100) + "%\n\n"
+            + "Coût d'entretien: " + city.getTotalMaintenanceCost() + " crédits/cycle";
+        
+        // On affiche les details
+        afficherAlerte("Détails de la Colonie", details, Alert.AlertType.INFORMATION);
     }
     
     /**
-     * Redémarre une nouvelle partie
+     * Passe au cycle suivant du jeu.
      */
-    private void restartGame() {
-        gameEngine.resetGame("Nova-7");
-        mainGameView.clearLogs();
-        updateView();
-        application.showMainGame(this);
+    private void passerCycleSuivant() {
+        // On execute un cycle de jeu
+        gameEngine.processCycle();
+        
+        // On met a jour l'affichage
+        mettreAJourVue();
+        
+        // On verifie si le jeu est termine
+        if (gameEngine.getGameState().isGameOver()) {
+            gererFinDePartie();
+        }
     }
     
     /**
-     * Met à jour toute la vue avec l'état actuel
+     * Gere la fin de partie (game over).
      */
-    private void updateView() {
-        Platform.runLater(() -> {
-            mainGameView.updateDisplay(gameEngine.getGameState());
-            
-            // Ajouter les nouveaux logs
-            List<String> recentLogs = gameEngine.getRecentLogs(10);
-            if (!recentLogs.isEmpty()) {
-                mainGameView.addLogs(recentLogs);
+    private void gererFinDePartie() {
+        // Platform.runLater() permet d'executer du code sur le thread JavaFX
+        // C'est necessaire pour modifier l'interface graphique
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                GameState gameState = gameEngine.getGameState();
+                City city = gameState.getCity();
+                
+                // On cree la vue de fin de partie
+                GameOverView gameOverView = new GameOverView();
+                
+                // On lui donne les informations
+                gameOverView.setGameOverInfo(
+                    gameState.getGameOverReason(),
+                    gameState.getCurrentCycle(),
+                    gameState.getResources(),
+                    gameState.getHappiness(),
+                    city.getTotalPopulation()
+                );
+                
+                // On configure le bouton "Nouvelle Mission"
+                gameOverView.getNewGameButton().setOnAction(e -> recommencerPartie());
+                
+                // On configure le bouton "Quitter"
+                gameOverView.getQuitButton().setOnAction(e -> Platform.exit());
+                
+                // On affiche l'ecran de fin de partie
+                application.showGameOver(gameOverView);
             }
         });
     }
     
     /**
-     * Affiche une alerte
+     * Recommence une nouvelle partie.
      */
-    private void showAlert(String title, String content, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+    private void recommencerPartie() {
+        // On reinitialise le moteur de jeu
+        gameEngine.resetGame("Nova-7");
+        
+        // On efface le journal
+        mainGameView.clearLogs();
+        
+        // On met a jour l'affichage
+        mettreAJourVue();
+        
+        // On revient a l'ecran de jeu principal
+        application.showMainGame(this);
     }
+    
+    /**
+     * Met a jour toute l'interface avec l'etat actuel du jeu.
+     */
+    private void mettreAJourVue() {
+        // Platform.runLater() pour s'assurer qu'on est sur le thread JavaFX
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                // On met a jour l'affichage principal
+                mainGameView.updateDisplay(gameEngine.getGameState());
+                
+                // On ajoute les nouveaux messages du journal
+                List<String> logs = gameEngine.getRecentLogs(10);
+                if (logs.size() > 0) {
+                    mainGameView.addLogs(logs);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Affiche une fenetre d'alerte avec un message.
+     * 
+     * @param titre Le titre de la fenetre
+     * @param contenu Le message a afficher
+     * @param type Le type d'alerte (INFORMATION, WARNING, ERROR)
+     */
+    private void afficherAlerte(String titre, String contenu, Alert.AlertType type) {
+        // On cree une alerte
+        Alert alerte = new Alert(type);
+        
+        // On configure l'alerte
+        alerte.setTitle(titre);
+        alerte.setHeaderText(null);  // Pas d'en-tete
+        alerte.setContentText(contenu);
+        
+        // On affiche et on attend que l'utilisateur ferme
+        alerte.showAndWait();
+    }
+    
+    // ========================================
+    // GETTERS
+    // ========================================
     
     public MainGameView getMainGameView() {
         return mainGameView;

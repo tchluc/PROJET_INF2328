@@ -1,134 +1,254 @@
 package model;
 
 /**
- * Classe représentant une centrale électrique dans la colonie.
- * Chaque centrale a un type, un niveau, et produit de l'énergie.
+ * Cette classe represente une centrale electrique.
+ * 
+ * Une centrale produit de l'electricite pour alimenter les residences.
+ * Il existe plusieurs types de centrales (solaire, eolienne, charbon, etc.)
+ * et chaque centrale peut etre amelioree jusqu'au niveau 3.
  */
 public class PowerPlant {
-    private static int nextId = 1;
     
-    private int id;
-    private PowerPlantType type;
-    private int level; // Niveau de 1 à 3
-    private double production; // Production en kW
-    private int buildCost; // Coût de construction
-    private int upgradeCost; // Coût d'amélioration au niveau suivant
-    private int maintenanceCost; // Coût d'entretien par cycle
+    // Compteur pour generer des identifiants uniques
+    // C'est une variable "static" donc partagee par toutes les centrales
+    private static int prochainId = 1;
     
-    // Matrices de statistiques par type et niveau
-    // Format: [type][level-1] = valeur
-    private static final double[][] BASE_PRODUCTION = {
-        {80, 150, 250},    // Solaire
-        {100, 180, 300},   // Éolienne
-        {150, 280, 450},   // Charbon
-        {200, 400, 700},   // Nucléaire
-        {300, 600, 1000}   // Fusion
-    };
-    
-    private static final int[][] BUILD_COSTS = {
-        {100, 180, 300},   // Solaire
-        {120, 200, 350},   // Éolienne
-        {150, 250, 400},   // Charbon
-        {300, 500, 800},   // Nucléaire
-        {500, 900, 1500}   // Fusion
-    };
-    
-    private static final int[][] UPGRADE_COSTS = {
-        {80, 120, 0},      // Solaire (0 = max level)
-        {100, 150, 0},     // Éolienne
-        {120, 180, 0},     // Charbon
-        {250, 400, 0},     // Nucléaire
-        {400, 700, 0}      // Fusion
-    };
-    
-    private static final int[][] MAINTENANCE_COSTS = {
-        {5, 8, 12},        // Solaire (faible entretien)
-        {7, 10, 15},       // Éolienne
-        {15, 25, 40},      // Charbon (élevé)
-        {20, 35, 60},      // Nucléaire (très élevé)
-        {30, 50, 80}       // Fusion (extrême)
-    };
+    // Les attributs de la centrale
+    private int id;                // Identifiant unique
+    private PowerPlantType type;   // Type de centrale (solaire, eolienne, etc.)
+    private int level;             // Niveau actuel (1, 2 ou 3)
+    private double production;     // Production en kW
+    private int buildCost;         // Cout de construction
+    private int upgradeCost;       // Cout pour ameliorer
+    private int maintenanceCost;   // Cout d'entretien par cycle
     
     /**
-     * Constructeur d'une centrale électrique
-     * @param type Type de centrale
-     * @param level Niveau initial (1-3)
+     * Constructeur principal: cree une centrale d'un type et niveau donnes
+     * 
+     * @param type Le type de centrale (SOLAR, WIND, COAL, NUCLEAR, FUSION)
+     * @param level Le niveau initial (1, 2 ou 3)
      */
     public PowerPlant(PowerPlantType type, int level) {
-        if (level < 1 || level > 3) {
-            throw new IllegalArgumentException("Le niveau doit être entre 1 et 3");
+        // On verifie que le niveau est valide
+        if (level < 1) {
+            level = 1;
+        }
+        if (level > 3) {
+            level = 3;
         }
         
-        this.id = nextId++;
+        // On attribue un identifiant unique
+        this.id = prochainId;
+        prochainId = prochainId + 1;  // On incremente pour la prochaine centrale
+        
+        // On enregistre le type et le niveau
         this.type = type;
         this.level = level;
         
-        // Initialisation des statistiques
-        updateStats();
+        // On calcule les statistiques selon le type et le niveau
+        calculerStatistiques();
     }
     
     /**
-     * Constructeur pour une nouvelle centrale (niveau 1)
-     * @param type Type de centrale
+     * Constructeur simplifie: cree une centrale de niveau 1
+     * 
+     * @param type Le type de centrale
      */
     public PowerPlant(PowerPlantType type) {
+        // On appelle l'autre constructeur avec niveau = 1
         this(type, 1);
     }
     
     /**
-     * Met à jour les statistiques selon le type et le niveau
+     * Calcule les statistiques (production, couts) selon le type et niveau.
+     * Cette methode est appelee apres la creation ou une amelioration.
      */
-    private void updateStats() {
-        int typeIndex = type.ordinal();
-        int levelIndex = level - 1;
+    private void calculerStatistiques() {
+        // On utilise des if/else pour determiner les valeurs
+        // selon le type de centrale
         
-        this.production = BASE_PRODUCTION[typeIndex][levelIndex];
-        this.buildCost = BUILD_COSTS[typeIndex][levelIndex];
-        this.upgradeCost = UPGRADE_COSTS[typeIndex][levelIndex];
-        this.maintenanceCost = MAINTENANCE_COSTS[typeIndex][levelIndex];
+        // === CENTRALE SOLAIRE ===
+        if (type == PowerPlantType.SOLAR) {
+            if (level == 1) {
+                production = 80;
+                buildCost = 100;
+                upgradeCost = 80;
+                maintenanceCost = 5;
+            } else if (level == 2) {
+                production = 150;
+                buildCost = 180;
+                upgradeCost = 120;
+                maintenanceCost = 8;
+            } else {  // level == 3
+                production = 250;
+                buildCost = 300;
+                upgradeCost = 0;  // 0 = niveau maximum atteint
+                maintenanceCost = 12;
+            }
+        }
+        
+        // === CENTRALE EOLIENNE ===
+        else if (type == PowerPlantType.WIND) {
+            if (level == 1) {
+                production = 100;
+                buildCost = 120;
+                upgradeCost = 100;
+                maintenanceCost = 7;
+            } else if (level == 2) {
+                production = 180;
+                buildCost = 200;
+                upgradeCost = 150;
+                maintenanceCost = 10;
+            } else {
+                production = 300;
+                buildCost = 350;
+                upgradeCost = 0;
+                maintenanceCost = 15;
+            }
+        }
+        
+        // === CENTRALE AU CHARBON ===
+        else if (type == PowerPlantType.COAL) {
+            if (level == 1) {
+                production = 150;
+                buildCost = 150;
+                upgradeCost = 120;
+                maintenanceCost = 15;
+            } else if (level == 2) {
+                production = 280;
+                buildCost = 250;
+                upgradeCost = 180;
+                maintenanceCost = 25;
+            } else {
+                production = 450;
+                buildCost = 400;
+                upgradeCost = 0;
+                maintenanceCost = 40;
+            }
+        }
+        
+        // === CENTRALE NUCLEAIRE ===
+        else if (type == PowerPlantType.NUCLEAR) {
+            if (level == 1) {
+                production = 200;
+                buildCost = 300;
+                upgradeCost = 250;
+                maintenanceCost = 20;
+            } else if (level == 2) {
+                production = 400;
+                buildCost = 500;
+                upgradeCost = 400;
+                maintenanceCost = 35;
+            } else {
+                production = 700;
+                buildCost = 800;
+                upgradeCost = 0;
+                maintenanceCost = 60;
+            }
+        }
+        
+        // === CENTRALE A FUSION ===
+        else {  // type == PowerPlantType.FUSION
+            if (level == 1) {
+                production = 300;
+                buildCost = 500;
+                upgradeCost = 400;
+                maintenanceCost = 30;
+            } else if (level == 2) {
+                production = 600;
+                buildCost = 900;
+                upgradeCost = 700;
+                maintenanceCost = 50;
+            } else {
+                production = 1000;
+                buildCost = 1500;
+                upgradeCost = 0;
+                maintenanceCost = 80;
+            }
+        }
     }
     
     /**
-     * Améliore la centrale au niveau suivant
-     * @return true si l'amélioration est possible, false si déjà au max
+     * Ameliore la centrale au niveau suivant.
+     * 
+     * @return true si l'amelioration a reussi, false si deja au niveau max
      */
     public boolean upgrade() {
+        // On verifie si on peut ameliorer
         if (level >= 3) {
-            return false; // Déjà au niveau maximum
+            // On est deja au niveau maximum
+            return false;
         }
         
-        level++;
-        updateStats();
+        // On passe au niveau suivant
+        level = level + 1;
+        
+        // On recalcule les statistiques
+        calculerStatistiques();
+        
         return true;
     }
     
     /**
-     * Vérifie si la centrale peut être améliorée
-     * @return true si améliorable
+     * Verifie si la centrale peut etre amelioree.
+     * 
+     * @return true si le niveau est inferieur a 3
      */
     public boolean canUpgrade() {
-        return level < 3;
+        if (level < 3) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**
-     * Obtient le coût de construction initial pour ce type au niveau 1
-     * @param type Type de centrale
-     * @return Coût en crédits
+     * Methode statique pour obtenir le cout de construction
+     * d'une centrale de niveau 1 pour un type donne.
+     * 
+     * @param type Le type de centrale
+     * @return Le cout en credits
      */
     public static int getBuildCost(PowerPlantType type) {
-        return BUILD_COSTS[type.ordinal()][0];
+        // On retourne le cout selon le type
+        if (type == PowerPlantType.SOLAR) {
+            return 100;
+        } else if (type == PowerPlantType.WIND) {
+            return 120;
+        } else if (type == PowerPlantType.COAL) {
+            return 150;
+        } else if (type == PowerPlantType.NUCLEAR) {
+            return 300;
+        } else {  // FUSION
+            return 500;
+        }
     }
     
     /**
-     * Obtient la production d'une centrale de ce type au niveau 1
-     * @param type Type de centrale
-     * @return Production en kW
+     * Methode statique pour obtenir la production de base
+     * d'une centrale de niveau 1 pour un type donne.
+     * 
+     * @param type Le type de centrale
+     * @return La production en kW
      */
     public static double getBaseProduction(PowerPlantType type) {
-        return BASE_PRODUCTION[type.ordinal()][0];
+        if (type == PowerPlantType.SOLAR) {
+            return 80;
+        } else if (type == PowerPlantType.WIND) {
+            return 100;
+        } else if (type == PowerPlantType.COAL) {
+            return 150;
+        } else if (type == PowerPlantType.NUCLEAR) {
+            return 200;
+        } else {  // FUSION
+            return 300;
+        }
     }
     
-    // Getters
+    // ========================================
+    // GETTERS: methodes pour lire les valeurs
+    // ========================================
+    
     public int getId() {
         return id;
     }
@@ -157,9 +277,15 @@ public class PowerPlant {
         return maintenanceCost;
     }
     
+    /**
+     * Retourne une description textuelle de la centrale.
+     */
     @Override
     public String toString() {
-        return String.format("Centrale %s #%d (Niv.%d) - Production: %.0f kW - Entretien: %d cr/cycle",
-                type.getName(), id, level, production, maintenanceCost);
+        String description = "Centrale " + type.getName() + " #" + id 
+            + " (Niv." + level + ")"
+            + " - Production: " + Math.round(production) + " kW"
+            + " - Entretien: " + maintenanceCost + " cr/cycle";
+        return description;
     }
 }

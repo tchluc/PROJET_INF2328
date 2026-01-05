@@ -1,76 +1,116 @@
 package model;
 
 /**
- * Classe représentant l'état global du jeu.
- * Contient les ressources, le bonheur, le cycle actuel et la référence à la ville.
+ * Cette classe represente l'etat global du jeu.
+ * 
+ * Elle contient:
+ * - Les ressources (credits) du joueur
+ * - Le niveau de bonheur de la population
+ * - Le numero du cycle actuel
+ * - La reference vers la colonie (ville)
+ * - L'etat game over (fin de partie)
  */
 public class GameState {
-    // Constantes de jeu
-    public static final int INITIAL_RESOURCES = 500; // Crédits de départ
-    public static final double MIN_HAPPINESS_THRESHOLD = 0.3; // Seuil de bonheur minimum (30%)
-    public static final double HAPPINESS_DECAY_RATE = 0.02; // Décroissance naturelle par cycle
     
-    // État du jeu
-    private int resources; // Crédits disponibles
-    private double happiness; // Niveau de bonheur global (0.0 à 1.0)
-    private int currentCycle; // Numéro du cycle actuel
-    private City city; // Référence à la ville
-    private boolean gameOver; // Indique si le jeu est terminé
-    private String gameOverReason; // Raison de la fin du jeu
+    // ========================================
+    // CONSTANTES DU JEU
+    // ========================================
+    
+    // Nombre de credits au debut du jeu
+    public static final int INITIAL_RESOURCES = 500;
+    
+    // Seuil minimum de bonheur (30%)
+    // Si le bonheur descend en dessous, c'est game over
+    public static final double MIN_HAPPINESS_THRESHOLD = 0.3;
+    
+    // De combien le bonheur diminue naturellement par cycle
+    public static final double HAPPINESS_DECAY_RATE = 0.02;
+    
+    // ========================================
+    // ATTRIBUTS (ETAT DU JEU)
+    // ========================================
+    
+    private int resources;          // Credits disponibles
+    private double happiness;       // Bonheur (0.0 a 1.0)
+    private int currentCycle;       // Numero du cycle actuel
+    private City city;              // La colonie
+    private boolean gameOver;       // Est-ce que le jeu est fini?
+    private String gameOverReason;  // Pourquoi le jeu est fini
     
     /**
-     * Constructeur de l'état du jeu
-     * @param cityName Nom de la colonie
+     * Constructeur: cree un nouvel etat de jeu
+     * 
+     * @param cityName Le nom de la colonie
      */
     public GameState(String cityName) {
-        this.resources = INITIAL_RESOURCES;
-        this.happiness = 0.8; // 80% de bonheur initial
-        this.currentCycle = 0;
-        this.city = new City(cityName);
-        this.gameOver = false;
-        this.gameOverReason = "";
+        // On initialise avec les valeurs de depart
+        this.resources = INITIAL_RESOURCES;  // 500 credits
+        this.happiness = 0.8;                // 80% de bonheur
+        this.currentCycle = 0;               // On commence au cycle 0
+        this.city = new City(cityName);      // On cree la colonie
+        this.gameOver = false;               // Le jeu n'est pas fini
+        this.gameOverReason = "";            // Pas de raison pour l'instant
     }
     
     /**
-     * Ajoute des ressources
-     * @param amount Montant à ajouter
+     * Ajoute des credits aux ressources du joueur
+     * 
+     * @param amount Le montant a ajouter (peut etre negatif)
      */
     public void addResources(int amount) {
-        this.resources += amount;
+        this.resources = this.resources + amount;
     }
     
     /**
-     * Déduit des ressources
-     * @param amount Montant à déduire
-     * @return true si les ressources étaient suffisantes
+     * Depense des ressources (retire des credits)
+     * 
+     * @param amount Le montant a depenser
+     * @return true si on avait assez de credits, false sinon
      */
     public boolean spendResources(int amount) {
+        // On verifie si on a assez
         if (resources >= amount) {
-            resources -= amount;
+            // On depense
+            resources = resources - amount;
             return true;
+        } else {
+            // Pas assez de credits
+            return false;
         }
-        return false;
     }
     
     /**
-     * Définit le niveau de bonheur
-     * @param happiness Nouveau niveau (0.0 à 1.0)
+     * Definit le niveau de bonheur.
+     * Le bonheur est toujours entre 0 et 1.
+     * Si le bonheur tombe trop bas, c'est game over!
+     * 
+     * @param happiness Le nouveau niveau de bonheur
      */
     public void setHappiness(double happiness) {
-        this.happiness = Math.max(0.0, Math.min(1.0, happiness));
+        // On s'assure que c'est entre 0 et 1
+        if (happiness < 0.0) {
+            this.happiness = 0.0;
+        } else if (happiness > 1.0) {
+            this.happiness = 1.0;
+        } else {
+            this.happiness = happiness;
+        }
         
-        // Vérifier si le bonheur est trop bas
+        // On verifie si le bonheur est trop bas
         if (this.happiness < MIN_HAPPINESS_THRESHOLD) {
+            // Game Over!
             gameOver = true;
             gameOverReason = "Le bonheur de la population est tombé trop bas. Le conseil colonial vous a démis de vos fonctions.";
         }
     }
     
     /**
-     * Ajuste le bonheur (ajoute ou retire)
-     * @param delta Changement du bonheur
+     * Ajuste le bonheur (ajoute ou retire une valeur)
+     * 
+     * @param delta Le changement (+0.05 pour ajouter, -0.05 pour retirer)
      */
     public void adjustHappiness(double delta) {
+        // On utilise setHappiness pour gerer les limites
         setHappiness(happiness + delta);
     }
     
@@ -78,21 +118,27 @@ public class GameState {
      * Passe au cycle suivant
      */
     public void nextCycle() {
-        currentCycle++;
+        currentCycle = currentCycle + 1;
     }
     
     /**
-     * Vérifie si le joueur a assez de ressources
-     * @param amount Montant requis
-     * @return true si suffisant
+     * Verifie si le joueur a assez de credits
+     * 
+     * @param amount Le montant requis
+     * @return true si on a assez
      */
     public boolean hasEnoughResources(int amount) {
-        return resources >= amount;
+        if (resources >= amount) {
+            return true;
+        } else {
+            return false;
+        }
     }
     
     /**
-     * Termine le jeu avec une raison spécifique
-     * @param reason Raison de la fin du jeu
+     * Termine le jeu avec une raison specifique
+     * 
+     * @param reason La raison de la fin du jeu
      */
     public void endGame(String reason) {
         this.gameOver = true;
@@ -100,10 +146,12 @@ public class GameState {
     }
     
     /**
-     * Obtient un message de statut du bonheur
-     * @return Message descriptif
+     * Retourne un message decrivant le niveau de bonheur
+     * 
+     * @return Un mot descriptif
      */
     public String getHappinessStatus() {
+        // On utilise des if/else pour determiner le message
         if (happiness >= 0.8) {
             return "Excellente";
         } else if (happiness >= 0.6) {
@@ -118,26 +166,37 @@ public class GameState {
     }
     
     /**
-     * Calcule l'équilibre énergétique (production - demande)
-     * @return Différence en kW
+     * Calcule l'equilibre energetique (production - demande)
+     * 
+     * @return La difference en kW (positif = excedent, negatif = deficit)
      */
     public double getEnergyBalance() {
-        return city.getTotalEnergyProduction() - city.getTotalEnergyDemand();
+        double production = city.getTotalEnergyProduction();
+        double demande = city.getTotalEnergyDemand();
+        return production - demande;
     }
     
     /**
-     * Obtient le ratio production/demande
-     * @return Ratio (1.0 = parfait équilibre)
+     * Calcule le ratio production/demande
+     * 
+     * @return Le ratio (1.0 = equilibre parfait, < 1.0 = deficit)
      */
     public double getEnergyRatio() {
-        double demand = city.getTotalEnergyDemand();
-        if (demand == 0) {
+        double demande = city.getTotalEnergyDemand();
+        
+        // On evite la division par zero
+        if (demande == 0) {
             return 1.0;
         }
-        return city.getTotalEnergyProduction() / demand;
+        
+        double production = city.getTotalEnergyProduction();
+        return production / demande;
     }
     
-    // Getters
+    // ========================================
+    // GETTERS
+    // ========================================
+    
     public int getResources() {
         return resources;
     }

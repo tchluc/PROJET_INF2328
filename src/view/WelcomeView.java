@@ -10,66 +10,112 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 /**
- * Écran de bienvenue du jeu.
- * Affiche le titre, le lore et permet de démarrer la partie.
+ * Ecran de bienvenue du jeu.
+ * 
+ * Cet ecran s'affiche au lancement du jeu.
+ * Il montre:
+ * - Le titre du jeu
+ * - Une description de l'univers (lore)
+ * - Un bouton pour commencer a jouer
  */
 public class WelcomeView {
-    private VBox root;
-    private Button startButton;
     
+    // Le conteneur principal (une VBox = boite verticale)
+    private VBox root;
+    
+    // Le bouton pour commencer le jeu
+    private Button boutonDemarrer;
+    
+    /**
+     * Constructeur: cree la vue de bienvenue
+     */
     public WelcomeView() {
-        createView();
+        // On appelle la methode qui cree tous les elements visuels
+        creerVue();
     }
     
-    private void createView() {
+    /**
+     * Cree tous les elements de l'interface.
+     */
+    private void creerVue() {
+        // On cree la boite verticale principale
+        // 30 = espace entre les elements
         root = new VBox(30);
+        
+        // On centre tout au milieu
         root.setAlignment(Pos.CENTER);
+        
+        // On ajoute une marge de 50 pixels autour
         root.setPadding(new Insets(50));
+        
+        // On applique le style CSS
         root.getStyleClass().add("game-root");
         
-        // Titre
-        Text title = new Text("⚡ COLONY POWER ⚡");
-        title.getStyleClass().add("title");
+        // === TITRE ===
+        Text titre = new Text("⚡ COLONY POWER ⚡");
+        titre.getStyleClass().add("title");
         
-        Text subtitle = new Text("Gestionnaire d'Énergie Spatiale");
-        subtitle.getStyleClass().add("subtitle");
+        // === SOUS-TITRE ===
+        Text sousTitre = new Text("Gestionnaire d'Énergie Spatiale");
+        sousTitre.getStyleClass().add("subtitle");
         
-        // Lore
-        Label loreLabel = new Label(
-            "Bienvenue, Commandant !\n\n" +
-            "Vous êtes le nouveau Gestionnaire d'Énergie de la Colonie Nova-7,\n" +
-            "une station spatiale isolée aux confins de la galaxie.\n\n" +
-            "Votre mission : assurer la production et la distribution d'énergie\n" +
-            "pour maintenir les systèmes vitaux et le moral des colons.\n\n" +
-            "Chaque décision compte. Les ressources sont limitées.\n" +
-            "Le bonheur de la population dépend de vous.\n\n" +
-            "Bonne chance, Commandant. La colonie compte sur vous."
-        );
-        loreLabel.setWrapText(true);
-        loreLabel.setMaxWidth(700);
-        loreLabel.setTextAlignment(TextAlignment.CENTER);
-        loreLabel.getStyleClass().add("label-secondary");
-        loreLabel.setStyle("-fx-font-size: 16px; -fx-line-spacing: 5px;");
+        // === DESCRIPTION (LORE) ===
+        // On cree un label avec plusieurs lignes de texte
+        String texteDescription = "Bienvenue, Commandant !\n\n"
+            + "Vous êtes le nouveau Gestionnaire d'Énergie de la Colonie Nova-7,\n"
+            + "une station spatiale isolée aux confins de la galaxie.\n\n"
+            + "Votre mission : assurer la production et la distribution d'énergie\n"
+            + "pour maintenir les systèmes vitaux et le moral des colons.\n\n"
+            + "Chaque décision compte. Les ressources sont limitées.\n"
+            + "Le bonheur de la population dépend de vous.\n\n"
+            + "Bonne chance, Commandant. La colonie compte sur vous.";
         
-        // Bouton démarrer
-        startButton = new Button("▶ COMMENCER LA MISSION");
-        startButton.getStyleClass().add("button-primary");
-        startButton.setStyle("-fx-font-size: 18px; -fx-padding: 15px 40px;");
+        Label labelDescription = new Label(texteDescription);
+        labelDescription.setWrapText(true);
+        labelDescription.setMaxWidth(700);
+        labelDescription.setTextAlignment(TextAlignment.CENTER);
+        labelDescription.getStyleClass().add("label-secondary");
+        labelDescription.setStyle("-fx-font-size: 16px; -fx-line-spacing: 5px;");
         
-        root.getChildren().addAll(title, subtitle, loreLabel, startButton);
+        // === BOUTON DEMARRER ===
+        boutonDemarrer = new Button("▶ COMMENCER LA MISSION");
+        boutonDemarrer.getStyleClass().add("button-primary");
+        boutonDemarrer.setStyle("-fx-font-size: 18px; -fx-padding: 15px 40px;");
+        
+        // On ajoute tous les elements a la boite verticale
+        root.getChildren().add(titre);
+        root.getChildren().add(sousTitre);
+        root.getChildren().add(labelDescription);
+        root.getChildren().add(boutonDemarrer);
     }
     
+    /**
+     * Retourne le conteneur principal.
+     */
     public VBox getRoot() {
         return root;
     }
     
+    /**
+     * Retourne le bouton demarrer pour pouvoir y attacher une action.
+     */
     public Button getStartButton() {
-        return startButton;
+        return boutonDemarrer;
     }
     
+    /**
+     * Cree et retourne une Scene contenant cette vue.
+     * 
+     * @return La Scene prete a etre affichee
+     */
     public Scene createScene() {
+        // On cree une scene de 1200x800 pixels
         Scene scene = new Scene(root, 1200, 800);
-        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+        
+        // On charge le fichier CSS
+        String cheminCSS = getClass().getResource("styles.css").toExternalForm();
+        scene.getStylesheets().add(cheminCSS);
+        
         return scene;
     }
 }
