@@ -91,14 +91,14 @@ public class MainGameView {
      */
     private void creerBarreHaut() {
         // On cree une boite horizontale
-        HBox barreHaut = new HBox(30);
-        barreHaut.setPadding(new Insets(15, 20, 15, 20));
+        HBox barreHaut = new HBox(25);
+        barreHaut.setPadding(new Insets(12, 15, 12, 15));
         barreHaut.setAlignment(Pos.CENTER_LEFT);
         barreHaut.getStyleClass().add("info-bar");
 
         // Nom de la colonie
         labelNomColonie = new Label("Colonie Nova-7");
-        labelNomColonie.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #00d4ff;");
+        labelNomColonie.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         // Numero du cycle
         labelCycle = new Label("Cycle: 0");
@@ -111,11 +111,11 @@ public class MainGameView {
         // Bonheur (label + barre de progression)
         VBox boiteBonheur = new VBox(5);
 
-        labelBonheur = new Label("😊 Bonheur: 0%");
+        labelBonheur = new Label("Bonheur: 0%");
         labelBonheur.getStyleClass().add("label-stat");
 
         barreBonheur = new ProgressBar(0);
-        barreBonheur.setPrefWidth(150);
+        barreBonheur.setPrefWidth(120);
         barreBonheur.getStyleClass().add("progress-bar");
 
         boiteBonheur.getChildren().add(labelBonheur);
@@ -141,27 +141,27 @@ public class MainGameView {
      */
     private void creerPanneauGauche() {
         // On cree une boite verticale
-        VBox panneauGauche = new VBox(15);
-        panneauGauche.setPadding(new Insets(20));
-        panneauGauche.setPrefWidth(250);
+        VBox panneauGauche = new VBox(12);
+        panneauGauche.setPadding(new Insets(15));
+        panneauGauche.setPrefWidth(200);
         panneauGauche.getStyleClass().add("panel");
 
         // Titre du panneau
-        Label labelTitre = new Label("🎮 CONTRÔLES");
+        Label labelTitre = new Label("CONTRÔLES");
         labelTitre.getStyleClass().add("panel-header");
 
         // Bouton Construire
-        boutonConstruire = new Button("🏗️ Construire Centrale");
+        boutonConstruire = new Button("Construire");
         boutonConstruire.setMaxWidth(Double.MAX_VALUE); // Prend toute la largeur
         boutonConstruire.getStyleClass().add("button");
 
         // Bouton Ameliorer
-        boutonAmeliorer = new Button("⬆️ Améliorer Centrale");
+        boutonAmeliorer = new Button("Améliorer");
         boutonAmeliorer.setMaxWidth(Double.MAX_VALUE);
         boutonAmeliorer.getStyleClass().add("button");
 
         // Bouton Details
-        boutonDetails = new Button("📊 Voir Détails");
+        boutonDetails = new Button("Détails");
         boutonDetails.setMaxWidth(Double.MAX_VALUE);
         boutonDetails.getStyleClass().add("button");
 
@@ -169,11 +169,11 @@ public class MainGameView {
         Separator separateur = new Separator();
 
         // Bouton Cycle Suivant (plus gros et plus visible)
-        boutonCycleSuivant = new Button("⏩ CYCLE SUIVANT");
+        boutonCycleSuivant = new Button("CYCLE SUIVANT");
         boutonCycleSuivant.setMaxWidth(Double.MAX_VALUE);
         boutonCycleSuivant.getStyleClass().add("button");
         boutonCycleSuivant.getStyleClass().add("button-primary");
-        boutonCycleSuivant.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        boutonCycleSuivant.setStyle("-fx-font-weight: bold;");
 
         // On ajoute tous les elements
         panneauGauche.getChildren().add(labelTitre);
@@ -191,8 +191,8 @@ public class MainGameView {
      * Cree le panneau central avec l'affichage de l'energie et des batiments.
      */
     private void creerPanneauCentral() {
-        panneauCentral = new VBox(20);
-        panneauCentral.setPadding(new Insets(20));
+        panneauCentral = new VBox(15);
+        panneauCentral.setPadding(new Insets(15));
 
         // Section Energie
         VBox sectionEnergie = creerSectionEnergie();
@@ -210,12 +210,12 @@ public class MainGameView {
      * Cree la section affichant la production et la demande d'energie.
      */
     private VBox creerSectionEnergie() {
-        VBox section = new VBox(15);
-        section.setPadding(new Insets(20));
+        VBox section = new VBox(12);
+        section.setPadding(new Insets(15));
         section.getStyleClass().add("panel");
 
         // Titre
-        Label titre = new Label("⚡ ÉNERGIE");
+        Label titre = new Label("ÉNERGIE");
         titre.getStyleClass().add("panel-header");
 
         // Ligne Production
@@ -223,10 +223,10 @@ public class MainGameView {
         ligneProduction.setAlignment(Pos.CENTER_LEFT);
 
         labelProduction = new Label("Production: 0 kW");
-        labelProduction.setPrefWidth(200);
+        labelProduction.setPrefWidth(150);
 
         barreProduction = new ProgressBar(0);
-        barreProduction.setPrefWidth(400);
+        barreProduction.setPrefWidth(500);
         barreProduction.getStyleClass().add("progress-bar");
         barreProduction.getStyleClass().add("progress-bar-success");
 
@@ -238,10 +238,10 @@ public class MainGameView {
         ligneDemande.setAlignment(Pos.CENTER_LEFT);
 
         labelDemande = new Label("Demande: 0 kW");
-        labelDemande.setPrefWidth(200);
+        labelDemande.setPrefWidth(150);
 
         barreDemande = new ProgressBar(0);
-        barreDemande.setPrefWidth(400);
+        barreDemande.setPrefWidth(500);
         barreDemande.getStyleClass().add("progress-bar");
         barreDemande.getStyleClass().add("progress-bar-warning");
 
@@ -251,7 +251,7 @@ public class MainGameView {
         // Balance
         labelBalance = new Label("Balance: 0 kW");
         labelBalance.getStyleClass().add("label-stat");
-        labelBalance.setStyle("-fx-font-size: 18px;");
+        labelBalance.setStyle("-fx-font-size: 14px;");
 
         // On assemble
         section.getChildren().add(titre);
@@ -270,32 +270,32 @@ public class MainGameView {
         section.setAlignment(Pos.TOP_CENTER);
 
         // === COLONNE CENTRALES ===
-        VBox boiteCentrales = new VBox(10);
-        boiteCentrales.setPadding(new Insets(15));
+        VBox boiteCentrales = new VBox(8);
+        boiteCentrales.setPadding(new Insets(12));
         boiteCentrales.getStyleClass().add("panel");
-        boiteCentrales.setPrefWidth(400);
+        boiteCentrales.setPrefWidth(450);
 
-        Label titreCentrales = new Label("🏭 CENTRALES ÉLECTRIQUES");
+        Label titreCentrales = new Label("CENTRALES");
         titreCentrales.getStyleClass().add("panel-header");
 
         listeCentrales = new ListView<String>();
-        listeCentrales.setPrefHeight(200);
+        listeCentrales.setPrefHeight(180);
         listeCentrales.getStyleClass().add("list-view");
 
         boiteCentrales.getChildren().add(titreCentrales);
         boiteCentrales.getChildren().add(listeCentrales);
 
         // === COLONNE RESIDENCES ===
-        VBox boiteResidences = new VBox(10);
-        boiteResidences.setPadding(new Insets(15));
+        VBox boiteResidences = new VBox(8);
+        boiteResidences.setPadding(new Insets(12));
         boiteResidences.getStyleClass().add("panel");
-        boiteResidences.setPrefWidth(400);
+        boiteResidences.setPrefWidth(450);
 
-        Label titreResidences = new Label("🏘️ RÉSIDENCES");
+        Label titreResidences = new Label("RÉSIDENCES");
         titreResidences.getStyleClass().add("panel-header");
 
         listeResidences = new ListView<String>();
-        listeResidences.setPrefHeight(200);
+        listeResidences.setPrefHeight(180);
         listeResidences.getStyleClass().add("list-view");
 
         boiteResidences.getChildren().add(titreResidences);
@@ -312,12 +312,12 @@ public class MainGameView {
      * Cree le panneau du bas avec le journal des evenements.
      */
     private void creerPanneauBas() {
-        VBox panneauBas = new VBox(10);
-        panneauBas.setPadding(new Insets(15, 20, 15, 20));
-        panneauBas.setPrefHeight(180);
+        VBox panneauBas = new VBox(8);
+        panneauBas.setPadding(new Insets(12, 15, 12, 15));
+        panneauBas.setPrefHeight(150);
 
         // Titre
-        Label titre = new Label("📜 JOURNAL DE BORD");
+        Label titre = new Label("JOURNAL");
         titre.getStyleClass().add("panel-header");
 
         // Zone de texte pour le log
@@ -342,12 +342,12 @@ public class MainGameView {
         City city = gameState.getCity();
 
         // === MISE A JOUR DE LA BARRE DU HAUT ===
-        labelNomColonie.setText("🚀 " + city.getName());
+        labelNomColonie.setText(city.getName());
         labelCycle.setText("Cycle: " + gameState.getCurrentCycle());
-        labelResources.setText("💰 Crédits: " + gameState.getResources());
+        labelResources.setText("Crédits: " + gameState.getResources());
 
         double bonheur = gameState.getHappiness();
-        labelBonheur.setText("😊 Bonheur: " + Math.round(bonheur * 100) + "% (" + gameState.getHappinessStatus() + ")");
+        labelBonheur.setText("Bonheur: " + Math.round(bonheur * 100) + "% (" + gameState.getHappinessStatus() + ")");
         barreBonheur.setProgress(bonheur);
 
         // On change la couleur de la barre selon le niveau de bonheur
@@ -391,14 +391,14 @@ public class MainGameView {
         String styleBalance;
 
         if (balance >= 0) {
-            texteBalance = "✅ Excédent: +" + Math.round(balance) + " kW";
-            styleBalance = "-fx-text-fill: #10b981;"; // Vert
+            texteBalance = "Excédent: +" + Math.round(balance) + " kW";
+            styleBalance = "-fx-text-fill: #00ff00; -fx-font-weight: bold;"; // Vert
         } else {
-            texteBalance = "❌ Déficit: " + Math.round(balance) + " kW";
-            styleBalance = "-fx-text-fill: #ef4444;"; // Rouge
+            texteBalance = "Déficit: " + Math.round(balance) + " kW";
+            styleBalance = "-fx-text-fill: #ff0000; -fx-font-weight: bold;"; // Rouge
         }
         labelBalance.setText(texteBalance);
-        labelBalance.setStyle("-fx-font-size: 18px; " + styleBalance);
+        labelBalance.setStyle("-fx-font-size: 14px; " + styleBalance);
 
         // === MISE A JOUR DES LISTES ===
 
@@ -473,54 +473,9 @@ public class MainGameView {
      * Cree et retourne une Scene contenant cette vue.
      */
     public Scene createScene() {
-        Scene scene = new Scene(root, 1200, 800);
+        Scene scene = new Scene(root, 1400, 850);
         String cheminCSS = getClass().getResource("styles.css").toExternalForm();
         scene.getStylesheets().add(cheminCSS);
         return scene;
-    }
-
-    /**
-     * Ajoute les effets de survol sur les boutons
-     */
-    private void addHoverEffects() {
-        // Effet de scale pour tous les boutons
-        Button[] buttons = { buildButton, upgradeButton, detailsButton, nextCycleButton };
-
-        for (Button btn : buttons) {
-            btn.setOnMouseEntered(e -> {
-                ScaleTransition scale = new ScaleTransition(Duration.millis(100), btn);
-                scale.setToX(1.03);
-                scale.setToY(1.03);
-                scale.play();
-            });
-
-            btn.setOnMouseExited(e -> {
-                ScaleTransition scale = new ScaleTransition(Duration.millis(100), btn);
-                scale.setToX(1.0);
-                scale.setToY(1.0);
-                scale.play();
-            });
-        }
-    }
-
-    /**
-     * Anime la mise à jour d'une barre de progression
-     */
-    private void animateProgressBar(ProgressBar bar, double newValue) {
-        // Note: JavaFX ne supporte pas directement l'animation de ProgressBar
-        // mais la transition est adoucie par les styles CSS
-        bar.setProgress(newValue);
-    }
-
-    /**
-     * Ajoute un effet de flash pour attirer l'attention
-     */
-    private void flashElement(javafx.scene.Node element) {
-        FadeTransition flash = new FadeTransition(Duration.millis(300), element);
-        flash.setFromValue(1.0);
-        flash.setToValue(0.3);
-        flash.setCycleCount(2);
-        flash.setAutoReverse(true);
-        flash.play();
     }
 }

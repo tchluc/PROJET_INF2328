@@ -1,19 +1,13 @@
 package view;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ScaleTransition;
-import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import javafx.util.Duration;
 
 /**
  * Ecran de bienvenue du jeu.
@@ -57,22 +51,16 @@ public class WelcomeView {
         // On applique le style CSS
         root.getStyleClass().add("game-root");
 
-        // === TITRE AVEC EFFET DE LUEUR ===
+        // === TITRE ===
         Text titre = new Text("⚡ COLONY POWER ⚡");
         titre.getStyleClass().add("title");
-
-        // Effet de lueur sur le titre
-        DropShadow glowEffect = new DropShadow();
-        glowEffect.setColor(Color.rgb(0, 212, 255, 0.8));
-        glowEffect.setRadius(25);
-        glowEffect.setSpread(0.6);
-        titre.setEffect(glowEffect);
 
         // === SOUS-TITRE ===
         Text sousTitre = new Text("Gestionnaire d'Énergie Spatiale");
         sousTitre.getStyleClass().add("subtitle");
 
         // === DESCRIPTION (LORE) ===
+        // On cree un label avec plusieurs lignes de texte
         String texteDescription = "Bienvenue, Commandant !\n\n"
                 + "Vous êtes le nouveau Gestionnaire d'Énergie de la Colonie Nova-7,\n"
                 + "une station spatiale isolée aux confins de la galaxie.\n\n"
@@ -84,75 +72,21 @@ public class WelcomeView {
 
         Label labelDescription = new Label(texteDescription);
         labelDescription.setWrapText(true);
-        labelDescription.setMaxWidth(750);
+        labelDescription.setMaxWidth(700);
         labelDescription.setTextAlignment(TextAlignment.CENTER);
         labelDescription.getStyleClass().add("label-secondary");
-        labelDescription.setStyle("-fx-font-size: 17px; -fx-line-spacing: 6px;");
+        labelDescription.setStyle("-fx-font-size: 16px; -fx-line-spacing: 5px;");
 
-        // === BOUTON DEMARRER AVEC EFFET PULSE ===
+        // === BOUTON DEMARRER ===
         boutonDemarrer = new Button("▶ COMMENCER LA MISSION");
         boutonDemarrer.getStyleClass().add("button-primary");
-        boutonDemarrer.setStyle("-fx-font-size: 20px; -fx-padding: 18px 45px;");
+        boutonDemarrer.setStyle("-fx-font-size: 18px; -fx-padding: 15px 40px;");
 
         // On ajoute tous les elements a la boite verticale
         root.getChildren().add(titre);
         root.getChildren().add(sousTitre);
         root.getChildren().add(labelDescription);
         root.getChildren().add(boutonDemarrer);
-
-        // === ANIMATIONS D'APPARITION ===
-        animerEntree(titre, 0);
-        animerEntree(sousTitre, 200);
-        animerEntree(labelDescription, 400);
-        animerBouton(boutonDemarrer, 600);
-    }
-
-    /**
-     * Anime l'apparition d'un élément avec un effet de fade-in et translation
-     */
-    private void animerEntree(javafx.scene.Node element, int delaiMs) {
-        // Rendre l'élément invisible au départ
-        element.setOpacity(0);
-        element.setTranslateY(20);
-
-        // Animation de fade-in
-        FadeTransition fade = new FadeTransition(Duration.millis(800), element);
-        fade.setFromValue(0);
-        fade.setToValue(1);
-        fade.setDelay(Duration.millis(delaiMs));
-
-        // Animation de translation (monte vers le haut)
-        TranslateTransition translate = new TranslateTransition(Duration.millis(800), element);
-        translate.setFromY(20);
-        translate.setToY(0);
-        translate.setDelay(Duration.millis(delaiMs));
-
-        // Lancer les animations
-        fade.play();
-        translate.play();
-    }
-
-    /**
-     * Anime le bouton avec un effet de pulse
-     */
-    private void animerBouton(Button bouton, int delaiMs) {
-        // D'abord l'animation d'apparition
-        animerEntree(bouton, delaiMs);
-
-        // Ensuite l'effet de pulse au survol
-        bouton.setOnMouseEntered(e -> {
-            ScaleTransition pulse = new ScaleTransition(Duration.millis(150), bouton);
-            pulse.setToX(1.05);
-            pulse.setToY(1.05);
-            pulse.play();
-        });
-
-        bouton.setOnMouseExited(e -> {
-            ScaleTransition depulse = new ScaleTransition(Duration.millis(150), bouton);
-            depulse.setToX(1.0);
-            depulse.setToY(1.0);
-            depulse.play();
-        });
     }
 
     /**
