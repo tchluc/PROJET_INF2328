@@ -1,86 +1,126 @@
-/* Feuille de style pour le jeu de gestion d'énergie */
-/* Thème spatial sombre avec accents cyan/bleu */
+/* ============================================================
+   COLONY POWER - Advanced Space-Themed UI
+   Thème spatial moderne avec glassmorphism, animations et effets
+   ============================================================ */
 
+/* ==================== VARIABLES GLOBALES ==================== */
 .root {
-    -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
+    -fx-font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
     -fx-font-size: 14px;
-    
-    /* Palette de couleurs spatiale */
+
+    /* Palette de couleurs spatiale enrichie */
     -fx-background-dark: #0a0e27;
     -fx-background-medium: #1a1f3a;
     -fx-background-light: #2a3150;
-    
+
     -fx-accent-cyan: #00d4ff;
     -fx-accent-blue: #4a90ff;
     -fx-accent-purple: #8b5cf6;
-    
+    -fx-accent-pink: #ec4899;
+
     -fx-text-primary: #ffffff;
     -fx-text-secondary: #b0b8d4;
-    
+    -fx-text-muted: #6b7280;
+
     -fx-success: #10b981;
     -fx-warning: #f59e0b;
     -fx-danger: #ef4444;
+    -fx-info: #3b82f6;
 }
 
-/* Fond principal */
+/* ==================== FOND PRINCIPAL ==================== */
 .game-root {
-    -fx-background-color: linear-gradient(to bottom, #0a0e27, #1a1f3a);
+    -fx-background-color:
+        radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.08), transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.06), transparent 50%),
+        linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
 }
 
-/* Titre principal */
+/* ==================== TYPOGRAPHIE ==================== */
 .title {
-    -fx-font-size: 48px;
+    -fx-font-size: 56px;
     -fx-font-weight: bold;
-    -fx-fill: linear-gradient(to right, #00d4ff, #4a90ff);
-    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.5), 10, 0, 0, 0);
+    -fx-fill: linear-gradient(to right, #00d4ff, #4a90ff, #8b5cf6);
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.7), 20, 0.5, 0, 0);
+    -fx-stroke: rgba(0, 212, 255, 0.3);
+    -fx-stroke-width: 1;
 }
 
 .subtitle {
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-fill: #b0b8d4;
     -fx-font-style: italic;
+    -fx-font-weight: 300;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 4, 0, 0, 2);
 }
 
-/* Boutons */
+/* ==================== BOUTONS AMÉLIORÉS ==================== */
 .button {
-    -fx-background-color: linear-gradient(to bottom, #2a3150, #1a1f3a);
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(42, 49, 80, 0.8), rgba(26, 31, 58, 0.9));
     -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 12px 24px;
-    -fx-background-radius: 8px;
-    -fx-border-color: #00d4ff;
+    -fx-font-weight: 600;
+    -fx-padding: 14px 28px;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(0, 212, 255, 0.5);
     -fx-border-width: 2px;
-    -fx-border-radius: 8px;
+    -fx-border-radius: 10px;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 0, 4);
+    /* Transition simulée via hover */
 }
 
 .button:hover {
-    -fx-background-color: linear-gradient(to bottom, #3a4160, #2a3150);
-    -fx-border-color: #4a90ff;
-    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.3), 8, 0, 0, 0);
+    -fx-background-color:
+        linear-gradient(to bottom right, rgba(74, 144, 255, 0.4), rgba(0, 212, 255, 0.3));
+    -fx-border-color: #00d4ff;
+    -fx-effect:
+        dropshadow(gaussian, rgba(0, 212, 255, 0.6), 15, 0.7, 0, 0),
+        innershadow(gaussian, rgba(0, 212, 255, 0.2), 10, 0, 0, 0);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 .button:pressed {
-    -fx-background-color: #1a1f3a;
-    -fx-translate-y: 1px;
+    -fx-background-color: rgba(26, 31, 58, 0.95);
+    -fx-translate-y: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0, 0, 2);
 }
 
 .button-primary {
-    -fx-background-color: linear-gradient(to bottom, #00d4ff, #0099cc);
+    -fx-background-color:
+        linear-gradient(135deg, #00d4ff 0%, #4a90ff 50%, #00d4ff 100%);
     -fx-border-color: transparent;
+    -fx-effect:
+        dropshadow(gaussian, rgba(0, 212, 255, 0.5), 12, 0.5, 0, 4),
+        innershadow(gaussian, rgba(255, 255, 255, 0.2), 5, 0, 0, 1);
 }
 
 .button-primary:hover {
-    -fx-background-color: linear-gradient(to bottom, #4a90ff, #00d4ff);
+    -fx-background-color:
+        linear-gradient(135deg, #4a90ff 0%, #8b5cf6 50%, #4a90ff 100%);
+    -fx-effect:
+        dropshadow(gaussian, rgba(74, 144, 255, 0.8), 20, 0.7, 0, 0),
+        innershadow(gaussian, rgba(255, 255, 255, 0.3), 8, 0, 0, 1);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
 
 .button-danger {
-    -fx-background-color: linear-gradient(to bottom, #ef4444, #dc2626);
+    -fx-background-color:
+        linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.4), 10, 0.5, 0, 3);
 }
 
-/* Labels */
+.button-danger:hover {
+    -fx-background-color:
+        linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.7), 16, 0.7, 0, 0);
+}
+
+/* ==================== LABELS ==================== */
 .label {
     -fx-text-fill: #ffffff;
 }
@@ -91,75 +131,123 @@
 
 .label-stat {
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 700;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 2, 0, 0, 1);
 }
 
-/* Panneaux */
+/* ==================== PANNEAUX GLASSMORPHISM ==================== */
 .panel {
-    -fx-background-color: rgba(26, 31, 58, 0.9);
-    -fx-background-radius: 12px;
-    -fx-padding: 20px;
-    -fx-border-color: rgba(0, 212, 255, 0.3);
-    -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-background-color:
+        linear-gradient(135deg,
+            rgba(26, 31, 58, 0.7) 0%,
+            rgba(42, 49, 80, 0.5) 100%);
+    -fx-background-radius: 16px;
+    -fx-padding: 24px;
+    -fx-border-color: rgba(0, 212, 255, 0.4);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 16px;
+    -fx-effect:
+        dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 0, 6),
+        innershadow(gaussian, rgba(255, 255, 255, 0.05), 20, 0, 0, 1);
 }
 
 .panel-header {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
     -fx-text-fill: #00d4ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.5), 8, 0, 0, 0);
 }
 
-/* Barre supérieure d'informations */
+/* ==================== BARRE SUPÉRIEURE ==================== */
 .info-bar {
-    -fx-background-color: linear-gradient(to bottom, #1a1f3a, #0a0e27);
-    -fx-padding: 15px 20px;
-    -fx-border-color: #00d4ff;
+    -fx-background-color:
+        linear-gradient(to bottom,
+            rgba(26, 31, 58, 0.95) 0%,
+            rgba(10, 14, 39, 0.98) 100%);
+    -fx-padding: 18px 24px;
+    -fx-border-color: rgba(0, 212, 255, 0.6);
     -fx-border-width: 0 0 2px 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 0, 4);
 }
 
 .info-item {
-    -fx-spacing: 5px;
-    -fx-padding: 5px 15px;
-    -fx-background-color: rgba(42, 49, 80, 0.6);
-    -fx-background-radius: 6px;
-}
-
-/* Barres de progression */
-.progress-bar {
-    -fx-background-color: rgba(42, 49, 80, 0.8);
-    -fx-background-radius: 10px;
-    -fx-padding: 0;
-}
-
-.progress-bar .bar {
-    -fx-background-color: linear-gradient(to right, #00d4ff, #4a90ff);
-    -fx-background-radius: 10px;
-    -fx-padding: 8px;
-}
-
-.progress-bar-success .bar {
-    -fx-background-color: linear-gradient(to right, #10b981, #059669);
-}
-
-.progress-bar-warning .bar {
-    -fx-background-color: linear-gradient(to right, #f59e0b, #d97706);
-}
-
-.progress-bar-danger .bar {
-    -fx-background-color: linear-gradient(to right, #ef4444, #dc2626);
-}
-
-/* Zone de logs */
-.log-area {
-    -fx-background-color: #0a0e27;
-    -fx-text-fill: #b0b8d4;
-    -fx-font-family: 'Consolas', 'Monaco', monospace;
-    -fx-font-size: 12px;
+    -fx-spacing: 8px;
+    -fx-padding: 8px 18px;
+    -fx-background-color: rgba(42, 49, 80, 0.7);
     -fx-background-radius: 8px;
     -fx-border-color: rgba(0, 212, 255, 0.2);
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+}
+
+/* ==================== BARRES DE PROGRESSION ANIMÉES ==================== */
+.progress-bar {
+    -fx-background-color: rgba(42, 49, 80, 0.9);
+    -fx-background-radius: 12px;
+    -fx-padding: 0;
+    -fx-border-color: rgba(0, 212, 255, 0.3);
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);
+}
+
+.progress-bar .bar {
+    -fx-background-color:
+        linear-gradient(90deg,
+            rgba(0, 212, 255, 0.8) 0%,
+            rgba(74, 144, 255, 1) 50%,
+            rgba(139, 92, 246, 0.8) 100%);
+    -fx-background-radius: 12px;
+    -fx-padding: 10px;
+    -fx-effect:
+        dropshadow(gaussian, rgba(0, 212, 255, 0.6), 8, 0.5, 0, 0),
+        innershadow(gaussian, rgba(255, 255, 255, 0.3), 4, 0, 0, 1);
+}
+
+.progress-bar .track {
+    -fx-background-color: rgba(42, 49, 80, 0.9);
+    -fx-background-radius: 12px;
+}
+
+.progress-bar-success .bar {
+    -fx-background-color:
+        linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
+    -fx-effect:
+        dropshadow(gaussian, rgba(16, 185, 129, 0.6), 8, 0.5, 0, 0),
+        innershadow(gaussian, rgba(255, 255, 255, 0.2), 4, 0, 0, 1);
+}
+
+.progress-bar-warning .bar {
+    -fx-background-color:
+        linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    -fx-effect:
+        dropshadow(gaussian, rgba(245, 158, 11, 0.6), 8, 0.5, 0, 0),
+        innershadow(gaussian, rgba(255, 255, 255, 0.2), 4, 0, 0, 1);
+}
+
+.progress-bar-danger .bar {
+    -fx-background-color:
+        linear-gradient(90deg, #ef4444 0%, #f87171 50%, #ef4444 100%);
+    -fx-effect:
+        dropshadow(gaussian, rgba(239, 68, 68, 0.6), 8, 0.5, 0, 0),
+        innershadow(gaussian, rgba(255, 255, 255, 0.2), 4, 0, 0, 1);
+}
+
+/* ==================== ZONE DE LOGS ==================== */
+.log-area {
+    -fx-background-color: rgba(10, 14, 39, 0.95);
+    -fx-text-fill: #b0b8d4;
+    -fx-font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    -fx-font-size: 13px;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(0, 212, 255, 0.3);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px;
+    -fx-effect:
+        innershadow(gaussian, rgba(0, 0, 0, 0.6), 8, 0, 0, 3),
+        dropshadow(gaussian, rgba(0, 212, 255, 0.2), 6, 0, 0, 0);
 }
 
 .scroll-pane {
@@ -171,92 +259,163 @@
     -fx-background-color: transparent;
 }
 
-/* Dialogues */
+.scroll-pane .scroll-bar {
+    -fx-background-color: rgba(26, 31, 58, 0.5);
+}
+
+.scroll-pane .scroll-bar .thumb {
+    -fx-background-color: rgba(0, 212, 255, 0.5);
+    -fx-background-radius: 5px;
+}
+
+.scroll-pane .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(0, 212, 255, 0.8);
+}
+
+/* ==================== DIALOGUES ==================== */
 .dialog-pane {
-    -fx-background-color: #1a1f3a;
+    -fx-background-color:
+        linear-gradient(135deg,
+            rgba(26, 31, 58, 0.98) 0%,
+            rgba(42, 49, 80, 0.95) 100%);
     -fx-border-color: #00d4ff;
     -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 20, 0, 0, 10);
 }
 
 .dialog-pane .header-panel {
-    -fx-background-color: linear-gradient(to bottom, #2a3150, #1a1f3a);
+    -fx-background-color:
+        linear-gradient(to bottom,
+            rgba(42, 49, 80, 0.9),
+            rgba(26, 31, 58, 0.95));
+    -fx-background-radius: 12px 12px 0 0;
+    -fx-padding: 16px;
 }
 
 .dialog-pane .content {
-    -fx-background-color: #1a1f3a;
-    -fx-padding: 20px;
+    -fx-background-color: transparent;
+    -fx-padding: 24px;
 }
 
-/* Radio buttons */
+.dialog-pane .button-bar {
+    -fx-padding: 16px 24px 24px 24px;
+}
+
+/* ==================== RADIO BUTTONS ==================== */
 .radio-button {
     -fx-text-fill: #ffffff;
+    -fx-font-weight: 500;
 }
 
 .radio-button .radio {
-    -fx-background-color: #2a3150;
+    -fx-background-color: rgba(42, 49, 80, 0.8);
     -fx-border-color: #00d4ff;
     -fx-border-width: 2px;
+    -fx-background-radius: 50%;
     -fx-border-radius: 50%;
 }
 
+.radio-button:hover .radio {
+    -fx-border-color: #4a90ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.4), 6, 0, 0, 0);
+}
+
 .radio-button:selected .radio {
-    -fx-background-color: #00d4ff;
+    -fx-background-color:
+        radial-gradient(center 50% 50%, radius 50%, #00d4ff, #4a90ff);
+    -fx-border-color: #4a90ff;
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.7), 10, 0, 0, 0);
 }
 
 .radio-button:selected .dot {
-    -fx-background-color: #0a0e27;
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 50%;
 }
 
-/* Separator */
+/* ==================== SÉPARATEURS ==================== */
 .separator .line {
-    -fx-border-color: rgba(0, 212, 255, 0.3);
-    -fx-border-width: 1px;
+    -fx-border-color: rgba(0, 212, 255, 0.4);
+    -fx-border-width: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.3), 4, 0, 0, 0);
 }
 
-/* Liste des items */
+/* ==================== LISTES ==================== */
 .list-view {
-    -fx-background-color: transparent;
-    -fx-border-color: rgba(0, 212, 255, 0.3);
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
+    -fx-background-color: rgba(10, 14, 39, 0.6);
+    -fx-border-color: rgba(0, 212, 255, 0.4);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
 }
 
 .list-cell {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
-    -fx-padding: 10px;
+    -fx-padding: 12px 16px;
+    -fx-font-size: 14px;
 }
 
 .list-cell:filled:hover {
-    -fx-background-color: rgba(0, 212, 255, 0.1);
+    -fx-background-color: rgba(0, 212, 255, 0.15);
+    -fx-background-radius: 6px;
+    -fx-border-color: rgba(0, 212, 255, 0.3);
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
 }
 
 .list-cell:filled:selected {
-    -fx-background-color: rgba(0, 212, 255, 0.3);
+    -fx-background-color:
+        linear-gradient(to right,
+            rgba(0, 212, 255, 0.35),
+            rgba(74, 144, 255, 0.25));
+    -fx-background-radius: 6px;
     -fx-border-color: #00d4ff;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 6px;
+    -fx-effect:
+        dropshadow(gaussian, rgba(0, 212, 255, 0.4), 6, 0, 0, 0),
+        innershadow(gaussian, rgba(255, 255, 255, 0.1), 4, 0, 0, 1);
 }
 
-/* Tooltips */
+.list-cell:empty {
+    -fx-background-color: transparent;
+}
+
+/* ==================== TOOLTIPS ==================== */
 .tooltip {
-    -fx-background-color: #1a1f3a;
+    -fx-background-color:
+        linear-gradient(135deg,
+            rgba(26, 31, 58, 0.98),
+            rgba(42, 49, 80, 0.95));
     -fx-text-fill: #ffffff;
     -fx-border-color: #00d4ff;
-    -fx-border-width: 1px;
-    -fx-font-size: 12px;
-    -fx-padding: 8px;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 13px;
+    -fx-padding: 10px 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 12, 0, 0, 4);
 }
 
-/* Icônes et emojis */
+/* ==================== ICÔNES ==================== */
 .icon-label {
-    -fx-font-size: 24px;
+    -fx-font-size: 28px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.3), 4, 0, 0, 0);
 }
 
-/* Animation scintillante pour éléments importants */
-@keyframes glow {
-    from {
-        -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.3), 5, 0, 0, 0);
-    }
-    to {
-        -fx-effect: dropshadow(gaussian, rgba(0, 212, 255, 0.8), 15, 0, 0, 0);
-    }
+/* ==================== EFFETS SPÉCIAUX ==================== */
+
+/* Effet de pulsation pour éléments importants */
+.pulse-effect {
+    -fx-effect:
+        dropshadow(gaussian, rgba(0, 212, 255, 0.8), 15, 0.7, 0, 0);
+}
+
+/* Effet de brillance */
+.shine-effect {
+    -fx-effect:
+        innershadow(gaussian, rgba(255, 255, 255, 0.4), 10, 0, -5, -5),
+        dropshadow(gaussian, rgba(0, 212, 255, 0.6), 12, 0.5, 0, 0);
 }
